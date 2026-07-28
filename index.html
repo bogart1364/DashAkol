@@ -450,23 +450,40 @@
         @media (max-width: 900px) {
             .hero-grid { grid-template-columns: 1fr; text-align: center; gap: 2rem; }
             .hero-subtitle { margin-left: auto; margin-right: auto; }
-            .hero-buttons { justify-content: center; }
+            .hero-buttons { justify-content: center; flex-direction: column; align-items: center; }
             .hair-scene { max-width: 280px; margin: 0 auto; }
             .footer-grid { grid-template-columns: 1fr; text-align: center; }
             .footer-desc { margin: 0 auto; }
             .footer-bottom { justify-content: center; }
+            .stylists-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+            .services-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+            .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+            .reviews-grid { grid-template-columns: 1fr; }
+            .cal-day { min-height: 36px; }
+            #scroll-indicator { display: none; }
         }
         @media (max-width: 600px) {
-            section { padding: 4rem 1rem; }
+            section { padding: 3rem 1rem; }
             .cta-buttons { flex-direction: column; align-items: center; }
             .cta-buttons a { width: 100%; max-width: 280px; }
-            .slots-grid { grid-template-columns: repeat(4, 1fr); }
-            .cal-day { font-size: 0.6rem; }
+            .slots-grid { grid-template-columns: repeat(3, 1fr); }
+            .cal-day { font-size: 0.6rem; min-height: 32px; }
+            .hero-title { font-size: clamp(2rem, 8vw, 3.5rem) !important; }
+            .section-title { font-size: clamp(1.3rem, 5vw, 2rem) !important; }
+            .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+            .booking-box { padding: 1rem; }
+            .cal-wrapper { padding: 1rem; }
+            .slots-wrapper { padding: 1rem; }
+            .stylist-avatar { width: 110px; height: 110px; }
         }
         @media (hover: none) {
             body { cursor: auto; }
             #cursor, #cursor-dot, .cursor-trail, #scissors-cursor { display: none !important; }
             .btn-primary, .btn-secondary, .booking-btn, .booking-input, .scroll-dot, #back-to-top, .service-card-inner, .stylist-card, .review-card, .gallery-item { cursor: pointer; }
+        }
+        @media (pointer: coarse) {
+            #cursor, #cursor-dot, .cursor-trail, #scissors-cursor { display: none !important; }
+            body { cursor: auto; }
         }
     </style>
 </head>
@@ -1626,22 +1643,25 @@
         const cameraScene = document.getElementById('camera-scene');
         const layerBg = document.getElementById('layerBg');
         const layerMid = document.getElementById('layerMid');
-        let targetX = 0, targetY = 0, currentX = 0, currentY = 0;
-        document.addEventListener('mousemove', (e) => {
-            const x = (e.clientX / window.innerWidth - 0.5) * 2;
-            const y = (e.clientY / window.innerHeight - 0.5) * 2;
-            targetX = x * 3;
-            targetY = y * 2;
-            if (layerBg) layerBg.style.transform = `translate(${x * -15}px, ${y * -10}px)`;
-            if (layerMid) layerMid.style.transform = `translate(${x * -8}px, ${y * -5}px)`;
-        });
-        function animateCamera() {
-            currentX += (targetX - currentX) * 0.06;
-            currentY += (targetY - currentY) * 0.06;
-            if (cameraScene) cameraScene.style.transform = `translate(${currentX}px, ${currentY}px)`;
-            requestAnimationFrame(animateCamera);
+        const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        if (!isTouch && cameraScene) {
+            let targetX = 0, targetY = 0, currentX = 0, currentY = 0;
+            document.addEventListener('mousemove', (e) => {
+                const x = (e.clientX / window.innerWidth - 0.5) * 2;
+                const y = (e.clientY / window.innerHeight - 0.5) * 2;
+                targetX = x * 3;
+                targetY = y * 2;
+                if (layerBg) layerBg.style.transform = `translate(${x * -15}px, ${y * -10}px)`;
+                if (layerMid) layerMid.style.transform = `translate(${x * -8}px, ${y * -5}px)`;
+            });
+            function animateCamera() {
+                currentX += (targetX - currentX) * 0.06;
+                currentY += (targetY - currentY) * 0.06;
+                if (cameraScene) cameraScene.style.transform = `translate(${currentX}px, ${currentY}px)`;
+                requestAnimationFrame(animateCamera);
+            }
+            animateCamera();
         }
-        animateCamera();
 
         const btt = document.getElementById('back-to-top');
         window.addEventListener('scroll', () => { btt.classList.toggle('show', window.scrollY > 500); }, { passive: true });
@@ -2267,10 +2287,11 @@
             lastScrollY = currentY;
         }, { passive: true });
 
-        // Mouse wheel on hair scene for finer control
+        // Mouse wheel on hair scene - only prevent when holding shift for fine control
         let wheelAccum = 0;
         if (hairScene) {
             hairScene.addEventListener('wheel', (e) => {
+                if (!e.shiftKey) return; // only intercept shift+wheel for fine hair control
                 e.preventDefault();
                 wheelAccum += e.deltaY;
                 if (Math.abs(wheelAccum) > 80) {
