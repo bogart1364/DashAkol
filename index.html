@@ -32,7 +32,6 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
         body {
             background: var(--bg);
             color: var(--text);
@@ -449,6 +448,7 @@
 
         @media (max-width: 900px) {
             section { min-height: auto; padding: 4rem 1rem; }
+            .grain { animation: none; opacity: 0; }
             .hero-grid { grid-template-columns: 1fr; text-align: center; gap: 2rem; }
             .hero-subtitle { margin-left: auto; margin-right: auto; }
             .hero-buttons { justify-content: center; flex-direction: column; align-items: center; }
@@ -1614,23 +1614,9 @@
         });
 
         const scrollProgress = document.getElementById('scroll-progress');
-        window.addEventListener('scroll', () => {
-            scrollProgress.style.width = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100) + '%';
-        }, { passive: true });
-
         const sections = ['hero', 'services', 'gallery', 'reviews', 'cta'];
         const dots = document.querySelectorAll('.scroll-dot');
-        function updateDots() {
-            const sp = window.scrollY + window.innerHeight / 3;
-            sections.forEach((id, i) => {
-                const el = document.getElementById(id);
-                if (el && sp >= el.offsetTop && sp < el.offsetTop + el.offsetHeight) {
-                    dots.forEach(d => d.classList.remove('active'));
-                    if (dots[i]) dots[i].classList.add('active');
-                }
-            });
-        }
-        window.addEventListener('scroll', updateDots, { passive: true });
+        const btt = document.getElementById('back-to-top');
         dots.forEach(d => d.addEventListener('click', () => {
             const el = document.getElementById(d.dataset.section);
             if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -1666,8 +1652,6 @@
             animateCamera();
         }
 
-        const btt = document.getElementById('back-to-top');
-        window.addEventListener('scroll', () => { btt.classList.toggle('show', window.scrollY > 500); }, { passive: true });
         btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
         const mobileMenu = document.getElementById('mobile-menu');
@@ -2271,23 +2255,51 @@
             updateHair(Math.max(0, cutLevel));
         }
 
+        // Single consolidated scroll handler with rAF throttle
+        let scrollRaf = false;
         window.addEventListener('scroll', () => {
-            handleHairScroll();
-            const currentY = window.scrollY;
-            if (currentY !== lastScrollY) {
-                if (!isScrolling) {
-                    isScrolling = true;
-                    document.body.classList.add('scrolling');
-                    if (snipEffect) snipEffect.classList.add('active');
+            if (scrollRaf) return;
+            scrollRaf = true;
+            requestAnimationFrame(() => {
+                const y = window.scrollY;
+
+                // Back to top
+                btt.classList.toggle('show', y > 500);
+
+                // Scroll progress
+                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                if (maxScroll > 0) scrollProgress.style.width = (y / maxScroll * 100) + '%';
+
+                // Scroll dots
+                const sp = y + window.innerHeight / 3;
+                sections.forEach((id, i) => {
+                    const el = document.getElementById(id);
+                    if (el && sp >= el.offsetTop && sp < el.offsetTop + el.offsetHeight) {
+                        dots.forEach(d => d.classList.remove('active'));
+                        if (dots[i]) dots[i].classList.add('active');
+                    }
+                });
+
+                // Hair cut (desktop only)
+                if (!isTouch) handleHairScroll();
+
+                // Scrolling class
+                if (y !== lastScrollY) {
+                    if (!isScrolling) {
+                        isScrolling = true;
+                        document.body.classList.add('scrolling');
+                        if (snipEffect) snipEffect.classList.add('active');
+                    }
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        isScrolling = false;
+                        document.body.classList.remove('scrolling');
+                        if (snipEffect) snipEffect.classList.remove('active');
+                    }, 300);
                 }
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(() => {
-                    isScrolling = false;
-                    document.body.classList.remove('scrolling');
-                    if (snipEffect) snipEffect.classList.remove('active');
-                }, 300);
-            }
-            lastScrollY = currentY;
+                lastScrollY = y;
+                scrollRaf = false;
+            });
         }, { passive: true });
 
         // Mouse wheel on hair scene - only prevent when holding shift for fine control
