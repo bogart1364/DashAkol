@@ -2081,32 +2081,31 @@
                     bookings[dateKey].push({ time: bookedSlot, name, phone, service, stylist });
                     saveBookingsLocal();
 
+                    // Telegram notification is optional — booking already saved
                     return fetch('/api/telegram', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ name, phone, service: serviceNames[service], stylist: stylistNames[stylist], date: `${selectedDayName} ${dateStr}`, time: bookedSlot, joke: `${joke.icon} ${joke.text}`, telegram_username: telegramUsername || null, booking_id: bookingId })
-                    });
+                    }).then(r => r.json()).catch(() => null);
                 })
-                .then(r => r.json())
-            .then(data => {
-                if (data.success) {
+                .then(data => {
                     bookName.value = '';
                     bookPhone.value = '';
                     selectedSlot = null;
                     renderCalendar();
                     renderSlots();
-                    showBookingModal(selectedDayName, dateStr, bookedSlot, serviceNames[service], stylistNames[stylist], name, joke.text, joke.icon);
-                } else {
-                    showBookingModal(selectedDayName, dateStr, bookedSlot, serviceNames[service], stylistNames[stylist], name, 'ارسال با مشکل مواجه شد. با شماره ۰۹۱۲۱۲۳۴۵۶۷ تماس بگیرید.', '⚠');
-                }
-            })
-            .catch(() => {
-                showBookingModal(selectedDayName, dateStr, bookedSlot, serviceNames[service], stylistNames[stylist], name, 'اتصال مشکل داشت. لطفاً با شماره ۰۹۱۲۱۲۳۴۵۶۷ تماس بگیرید.', '⚠');
-            })
-            .finally(() => {
-                isBooking = false;
-                updateBookBtn();
-            });
+                    const tgOk = data && data.success;
+                    const msg = tgOk ? joke.text : 'نوبت ثبت شد ولی اطلاع‌رسانی تلگرام با مشکل مواجه شد.';
+                    const icon = tgOk ? joke.icon : '⚠';
+                    showBookingModal(selectedDayName, dateStr, bookedSlot, serviceNames[service], stylistNames[stylist], name, msg, icon);
+                })
+                .catch(() => {
+                    showBookingModal(selectedDayName, dateStr, bookedSlot, serviceNames[service], stylistNames[stylist], name, 'اتصال مشکل داشت. لطفاً با شماره ۰۹۱۲۱۲۳۴۵۶۷ تماس بگیرید.', '⚠');
+                })
+                .finally(() => {
+                    isBooking = false;
+                    updateBookBtn();
+                });
         });
 
         renderCalendar();
