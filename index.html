@@ -1801,35 +1801,13 @@
             return [jy, jm, jd];
         }
 
-        function jalaliToGregorian(jy, jm, jd) {
-            let salA = [0, 31, 62, 93, 124, 155, 186, 216, 246, 276, 306, 336];
-            let gy = jy + 1595;
-            let days = -355668 + (365 * jy) + (Math.floor(jy / 33) * 8) + Math.floor(((jy % 33) + 3) / 4) + jd + ((jm < 7) ? salA[jm - 1] : (salA[jm - 1] - 30));
-            let gm, gd;
-            if (days > 0) {
-                gy = 400 * Math.floor(days / 146097);
-                days %= 146097;
-                if (days > 36524) {
-                    gy += 100 * Math.floor(--days / 36524);
-                    days %= 36524;
-                    if (days >= 365) days++;
-                }
-                gy += 4 * Math.floor(days / 1461);
-                days %= 1461;
-                if (days > 365) {
-                    gy += Math.floor((days - 1) / 365);
-                    days = (days - 1) % 365;
-                }
-                gd = days + 1;
-                let salA = [0, 31, ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-                for (gm = 0; gm < 13 && gd > salA[gm]; gm++) gd -= salA[gm];
-            }
-            return [gy, gm, gd];
+        function jalaliToJDN(jy, jm, jd) {
+            var y = jy - 979;
+            return 365 * y + Math.floor(y / 33) * 8 + Math.floor(((y % 33) + 3) / 4) + (jm <= 6 ? (jm - 1) * 31 : (jm - 7) * 30 + 186) + jd - 1;
         }
 
-        function getPersianDayOfWeek(gy, gm, gd) {
-            const jd = Math.floor((1461 * (gy + 4800 + Math.floor((gm - 14) / 12))) / 4) + Math.floor((367 * (gm - 2 - 12 * Math.floor((gm - 14) / 12))) / 12) - Math.floor((3 * Math.floor((gy + 4900 + Math.floor((gm - 14) / 12)) / 100)) / 4) + gd - 32075;
-            return (jd + 1) % 7; // 0=Saturday
+        function getJalaliDayOfWeek(jy, jm, jd) {
+            return (jalaliToJDN(jy, jm, jd) + 2) % 7; // 0=Saturday
         }
 
         function getDaysInJalaliMonth(jy, jm) {
@@ -1889,16 +1867,13 @@
 
         function renderCalendar() {
             const daysInMonth = getDaysInJalaliMonth(currentYear, currentMonth + 1);
-            // Get first day of month in Jalali
-            const firstDayJD = (currentYear - 1) * 365 + Math.floor((currentYear - 1) / 33) * 8 + Math.floor(((currentYear - 1) % 33 + 3) / 4) + ((currentMonth + 1) <= 6 ? (currentMonth) * 31 : 186 + (currentMonth - 6) * 30);
-            const firstDay = firstDayJD % 7; // 0=Saturday
+            const firstDayOffset = getJalaliDayOfWeek(currentYear, currentMonth + 1, 1); // 0=Saturday
 
             calTitle.textContent = `${persianMonths[currentMonth]} ${currentYear}`;
 
             calDays.innerHTML = '';
 
-            // Empty cells (Saturday start)
-            for (let i = 0; i < firstDay; i++) {
+            for (let i = 0; i < firstDayOffset; i++) {
                 const empty = document.createElement('div');
                 empty.className = 'cal-day empty';
                 calDays.appendChild(empty);
@@ -1915,10 +1890,8 @@
                 const isToday = (currentYear === todayJ[0] && currentMonth + 1 === todayJ[1] && d === todayJ[2]);
                 // Check if date is past using Jalali comparison directly
                 const isPast = (currentYear < todayJ[0]) || (currentYear === todayJ[0] && (currentMonth + 1) < todayJ[1]) || (currentYear === todayJ[0] && (currentMonth + 1) === todayJ[1] && d < todayJ[2]);
-                // Day of week using Jalali day count (epoch was Saturday)
-                const totalDaysJ = (currentYear - 1) * 365 + Math.floor((currentYear - 1) / 33) * 8 + Math.floor(((currentYear - 1) % 33 + 3) / 4) + ((currentMonth + 1) <= 6 ? (currentMonth) * 31 + d - 1 : 186 + (currentMonth - 6) * 30 + d - 1);
-                const dayOfWeek = totalDaysJ % 7; // 0=Saturday
-                const isWeekend = dayOfWeek === 4; // Friday in Jalali (4 = Friday)
+                const dayOfWeek = getJalaliDayOfWeek(currentYear, currentMonth + 1, d); // 0=Saturday
+                const isWeekend = dayOfWeek === 6; // جمعه
                 const dateKey = `${currentYear}-${currentMonth + 1}-${d}`;
                 const taken = generateTakenSlots(dateKey);
                 const isFull = taken.size >= timeSlots.length;
