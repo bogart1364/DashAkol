@@ -192,17 +192,19 @@ ${action === 'confirm'
             const dmResult = await sendTelegram(token, userChatId, userMsg);
             console.log('[DM] Sent to chat_id:', userChatId, 'result:', JSON.stringify(dmResult));
         } else if (booking && booking.telegram_username) {
-            // Try to find chat_id from telegram_users table (case-insensitive)
+            // Try to find chat_id from telegram_users table (case-insensitive, prefer personal/private chat)
             try {
                 const uname = booking.telegram_username.toLowerCase();
                 console.log('[DM] Looking up username:', uname);
                 const result = await db.execute({ sql: 'SELECT chat_id, username FROM telegram_users', args: [] });
                 console.log('[DM] All telegram_users:', JSON.stringify(result.rows));
                 
-                const found = result.rows.find(r => (r.username || '').toLowerCase() === uname);
+                // Prefer positive chat_id (personal chat) over negative (group)
+                const matches = result.rows.filter(r => (r.username || '').toLowerCase() === uname);
+                const found = matches.find(r => Number(r.chat_id) > 0) || matches[0];
                 if (found) {
                     const userChatId = found.chat_id;
-                    console.log('[DM] Found user:', userChatId, found.username);
+                    console.log('[DM] Found user:', userChatId, found.username, Number(userChatId) > 0 ? '(personal)' : '(group!)');
                     const serviceNames = { hair: 'اصلاح مو', beard: 'فرم دهی ریش', classic: 'اصلاح کلاسیک', texturize: 'پیتاژ', full: 'پکیج مرد کامل', groom: 'پکیج داماد' };
                     const userMsg = `${statusEmoji} نوبت شما ${statusText}!
 
