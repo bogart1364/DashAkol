@@ -2169,7 +2169,8 @@
 
             // Store the real booking
             if (!bookings[dateKey]) bookings[dateKey] = [];
-            bookings[dateKey].push({ time: selectedSlot, name, phone, service, stylist });
+            const bookedSlot = selectedSlot;
+            bookings[dateKey].push({ time: bookedSlot, name, phone, service, stylist });
             saveBookings(); // persist to localStorage
             delete takenSlots[dateKey]; // invalidate cache
             selectedSlot = null;
@@ -2257,7 +2258,7 @@
       <tr><td style="padding:16px 22px;">
         <table width="100%" cellpadding="0" cellspacing="0"><tr>
           <td style="color:#7a7880;font-size:11px;">ساعت</td>
-          <td dir="rtl" style="text-align:left;color:#c9a84c;font-size:22px;font-weight:900;">${clockSvg} ${selectedSlot}</td>
+          <td dir="rtl" style="text-align:left;color:#c9a84c;font-size:22px;font-weight:900;">${clockSvg} ${bookedSlot}</td>
         </tr></table>
       </td></tr>
     </table>
@@ -2293,12 +2294,12 @@
             formData.append('service', serviceNames[service]);
             formData.append('stylist', stylistNames[stylist]);
             formData.append('date', `${selectedDayName} ${dateStr}`);
-            formData.append('time', selectedSlot);
+            formData.append('time', bookedSlot);
             formData.append('_subject', `نوبت ثبت شد — ${name} | داش آکل`);
             formData.append('_captcha', 'false');
             formData.append('_template', 'table');
             formData.append('_html', emailHtml);
-            formData.append('message', `نوبت شما ثبت شد!\n\nنام: ${name}\nتلفن: ${phone}\nسرویس: ${serviceNames[service]}\nاستایلیست: ${stylistNames[stylist]}\nتاریخ: ${selectedDayName} ${dateStr}\nساعت: ${selectedSlot}\n\n${joke.icon} ${joke.text}\n\nداش آکل — تمامی حقوق موها محفوظ است`);
+            formData.append('message', `نوبت شما ثبت شد!\n\nنام: ${name}\nتلفن: ${phone}\nسرویس: ${serviceNames[service]}\nاستایلیست: ${stylistNames[stylist]}\nتاریخ: ${selectedDayName} ${dateStr}\nساعت: ${bookedSlot}\n\n${joke.icon} ${joke.text}\n\nداش آکل — تمامی حقوق موها محفوظ است`);
 
             bookBtn.textContent = 'داره ارسال میشه...';
             isBooking = true;
@@ -2315,13 +2316,13 @@
                     selectedSlot = null;
                     renderCalendar();
                     renderSlots();
-                    showBookingModal(selectedDayName, dateStr, selectedSlot, serviceNames[service], stylistNames[stylist], name, joke.text, joke.icon);
+                    showBookingModal(selectedDayName, dateStr, bookedSlot, serviceNames[service], stylistNames[stylist], name, joke.text, joke.icon);
                 } else {
-                    showBookingModal(selectedDayName, dateStr, selectedSlot, serviceNames[service], stylistNames[stylist], name, 'ایمیل تایید مشکل داشت. با شماره ۰۹۱۲۱۲۳۴۵۶۷ تماس بگیرید.', '⚠');
+                    showBookingModal(selectedDayName, dateStr, bookedSlot, serviceNames[service], stylistNames[stylist], name, 'ایمیل تایید مشکل داشت. با شماره ۰۹۱۲۱۲۳۴۵۶۷ تماس بگیرید.', '⚠');
                 }
             })
             .catch(() => {
-                showBookingModal(selectedDayName, dateStr, selectedSlot, serviceNames[service], stylistNames[stylist], name, 'اتصال مشکل داشت. لطفاً با شماره ۰۹۱۲۱۲۳۴۵۶۷ تماس بگیرید.', '⚠');
+                showBookingModal(selectedDayName, dateStr, bookedSlot, serviceNames[service], stylistNames[stylist], name, 'اتصال مشکل داشت. لطفاً با شماره ۰۹۱۲۱۲۳۴۵۶۷ تماس بگیرید.', '⚠');
             })
             .finally(() => {
                 isBooking = false;
