@@ -45,6 +45,24 @@ module.exports = async (req, res) => {
     if (req.method !== 'POST' && req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
     const token = process.env.TELEGRAM_BOT_TOKEN;
+
+    // Debug GET — check telegram_users table
+    if (req.method === 'GET') {
+        const db = getClient();
+        try {
+            await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (
+                chat_id TEXT PRIMARY KEY,
+                username TEXT,
+                first_name TEXT,
+                created_at TEXT DEFAULT (datetime('now'))
+            )`);
+            const users = await db.execute('SELECT * FROM telegram_users');
+            return res.status(200).json({ users: users.rows });
+        } catch (e) {
+            return res.status(500).json({ error: e.message });
+        }
+    }
+
     if (!token) return res.status(500).json({ error: 'No bot token' });
 
     let body = req.body;
@@ -206,23 +224,6 @@ ${action === 'confirm'
         }
 
         return res.status(200).json({ ok: true });
-    }
-
-    // Debug GET — check telegram_users table
-    if (req.method === 'GET') {
-        const db = getClient();
-        try {
-            await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (
-                chat_id TEXT PRIMARY KEY,
-                username TEXT,
-                first_name TEXT,
-                created_at TEXT DEFAULT (datetime('now'))
-            )`);
-            const users = await db.execute('SELECT * FROM telegram_users');
-            return res.status(200).json({ users: users.rows });
-        } catch (e) {
-            return res.status(500).json({ error: e.message });
-        }
     }
 
     return res.status(200).json({ ok: true });
