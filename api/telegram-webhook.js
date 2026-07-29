@@ -24,11 +24,14 @@ module.exports = async (req, res) => {
 
     const token = process.env.TELEGRAM_BOT_TOKEN;
 
-    // Debug GET
+    // Debug GET — also cleans up fake/small chat_ids
     if (req.method === 'GET') {
         const db = getClient();
         try {
             await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (chat_id TEXT PRIMARY KEY, username TEXT, first_name TEXT, created_at TEXT DEFAULT (datetime('now')))`);
+            // Clean up fake entries (chat_id < 100000 are likely test data)
+            await db.execute('DELETE FROM telegram_users WHERE CAST(chat_id AS INTEGER) < 100000');
+            await db.execute("UPDATE bookings SET telegram_chat_id = NULL WHERE CAST(telegram_chat_id AS INTEGER) < 100000");
             const users = await db.execute('SELECT * FROM telegram_users');
             const bookings = await db.execute('SELECT id, date_key, time, name, phone, service, stylist, status, telegram_username, telegram_chat_id FROM bookings ORDER BY id DESC LIMIT 10');
             return res.status(200).json({ users: users.rows, bookings: bookings.rows });
