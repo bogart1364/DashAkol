@@ -24,15 +24,12 @@ module.exports = async (req, res) => {
 
     const token = process.env.TELEGRAM_BOT_TOKEN;
 
-    // Debug GET — also cleans up fake/small chat_ids
+    // Debug GET — cleanups fake entries + shows data
     if (req.method === 'GET') {
         const db = getClient();
         try {
             await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (chat_id TEXT PRIMARY KEY, username TEXT, first_name TEXT, created_at TEXT DEFAULT (datetime('now')))`);
-            // Clean up fake entries (chat_id < 100000 are likely test data)
-            await db.execute('DELETE FROM telegram_users WHERE CAST(chat_id AS INTEGER) < 100000');
-            await db.execute("UPDATE bookings SET telegram_chat_id = NULL WHERE CAST(telegram_chat_id AS INTEGER) < 100000");
-            const users = await db.execute('SELECT * FROM telegram_users');
+            const users = await db.execute('SELECT * FROM telegram_users ORDER BY created_at DESC');
             const bookings = await db.execute('SELECT id, date_key, time, name, phone, service, stylist, status, telegram_username, telegram_chat_id FROM bookings ORDER BY id DESC LIMIT 10');
             return res.status(200).json({ users: users.rows, bookings: bookings.rows });
         } catch (e) {
@@ -135,22 +132,17 @@ module.exports = async (req, res) => {
         if (booking) {
             const dmText = `${statusEmoji} نوبت شما ${statusText}!\n\n📅 تاریخ: ${booking.date_key}\n🕐 ساعت: ${booking.time}\n✂️ سرویس: ${serviceNames[booking.service] || booking.service}\n\n${action === 'confirm' ? 'منتظرتون هستیم! 🤝' : 'متأسفیم، نوبت شما رد شد.'}`;
 
-            // Find user's personal chat_id
+            // Find user's personal chat_id from telegram_users table
             let userChatId = null;
 
-            // Method1: direct from booking
-            if (booking.telegram_chat_id && Number(booking.telegram_chat_id) > 0) {
-                userChatId = booking.telegram_chat_id;
-                console.log('[DM] Using chat_id from booking:', userChatId);
-            }
-
-            // Method2: lookup by username in telegram_users
-            if (!userChatId && booking.telegram_username) {
+            // Lookup by username in telegram_users (prefer most recent, personal)
+            if (booking.telegram_username) {
                 try {
                     const uname = booking.telegram_username.toLowerCase();
-                    const allUsers = await db.execute('SELECT chat_id, username FROM telegram_users');
+                    const allUsers = await db.execute('SELECT chat_id, username, created_at FROM telegram_users ORDER BY created_at DESC');
                     console.log('[DM] All users:', JSON.stringify(allUsers.rows));
                     const matches = allUsers.rows.filter(r => (r.username || '').toLowerCase() === uname);
+                    // Prefer most recent personal (positive) chat_id
                     const personal = matches.find(r => Number(r.chat_id) > 0);
                     if (personal) {
                         userChatId = personal.chat_id;
