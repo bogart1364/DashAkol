@@ -2149,8 +2149,7 @@
             selectedSlot = null;
 
             const dateStr = `${toPersianNum(selectedDate)} ${persianMonths[currentMonth]} ${currentYear}`;
-            const dayJD = (currentYear - 1) * 365 + Math.floor((currentYear - 1) / 33) * 8 + Math.floor(((currentYear - 1) % 33 + 3) / 4) + ((currentMonth + 1) <= 6 ? (currentMonth) * 31 + selectedDate - 1 : 186 + (currentMonth - 6) * 30 + selectedDate - 1);
-            const dayOfWeek = dayJD % 7;
+            const dayOfWeek = getJalaliDayOfWeek(currentYear, currentMonth + 1, selectedDate);
             const selectedDayName = persianDayNames[dayOfWeek];
 
             // SVG icons for email (inline, no emojis)
@@ -2277,13 +2276,19 @@
             bookBtn.textContent = 'داره ارسال میشه...';
             isBooking = true;
 
-            fetch('https://formsubmit.co/ajax/ali.peirovii@gmail.com', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
+            Promise.all([
+                fetch('https://formsubmit.co/ajax/ali.peirovii@gmail.com', {
+                    method: 'POST',
+                    body: formData
+                }).then(r => r.json()),
+                fetch('/api/telegram', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, phone, service: serviceNames[service], stylist: stylistNames[stylist], date: `${selectedDayName} ${dateStr}`, time: bookedSlot, joke: `${joke.icon} ${joke.text}` })
+                }).then(r => r.json()).catch(() => ({ success: true }))
+            ])
+            .then(([emailData]) => {
+                if (emailData.success) {
                     bookName.value = '';
                     bookPhone.value = '';
                     selectedSlot = null;
