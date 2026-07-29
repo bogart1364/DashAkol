@@ -62,11 +62,13 @@ module.exports = async (req, res) => {
         }
 
         try {
-            const result = await db.execute({
+            await db.execute({
                 sql: 'INSERT INTO bookings (date_key, time, name, phone, service, stylist, telegram_username, telegram_chat_id, telegram_message_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 args: [date_key, time, name, phone, service, stylist || 'any', telegram_username || null, telegram_chat_id || null, telegram_message_id || null]
             });
-            return res.status(200).json({ success: true, booking_id: Number(result.lastInsertRowid) });
+            const maxId = await db.execute('SELECT MAX(id) as mid FROM bookings');
+            const booking_id = maxId.rows[0].mid;
+            return res.status(200).json({ success: true, booking_id });
         } catch (e) {
             return res.status(500).json({ error: 'Insert failed', detail: e.message });
         }
