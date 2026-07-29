@@ -2151,6 +2151,7 @@
             const dateStr = `${toPersianNum(selectedDate)} ${persianMonths[currentMonth]} ${currentYear}`;
             const dayOfWeek = getJalaliDayOfWeek(currentYear, currentMonth + 1, selectedDate);
             const selectedDayName = persianDayNames[dayOfWeek];
+            const joke = dayJokes[dayOfWeek];
 
             bookBtn.textContent = 'داره ارسال میشه...';
             isBooking = true;
