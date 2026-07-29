@@ -33,6 +33,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- no Comic Neue — not imported, was causing fallback issues -->
     <style>
 
         :root {
@@ -58,7 +59,7 @@
         body {
             background: var(--bg);
             color: var(--text);
-            font-family: 'Vazirmatn', 'Comic Neue', sans-serif;
+            font-family: 'Vazirmatn', sans-serif;
             overflow-x: hidden;
             cursor: none;
         }
@@ -115,9 +116,9 @@
         .hero-image { width: 100%; height: 100%; object-fit: contain; transition: filter 0.5s; }
         .hero-image:hover { filter: drop-shadow(0 0 30px rgba(114, 47, 55, 0.3)); }
 
-        .btn-primary { background: var(--wine); color: white; padding: 0.9rem 2rem; border-radius: 10px; font-family: 'Vazirmatn', 'Comic Neue', sans-serif; font-weight: 700; font-size: clamp(0.8rem, 1.3vw, 0.95rem); text-decoration: none; border: none; cursor: none; transition: all 0.3s ease; display: inline-block; text-align: center; }
+        .btn-primary { background: var(--wine); color: white; padding: 0.9rem 2rem; border-radius: 10px; font-family: 'Vazirmatn', sans-serif; font-weight: 700; font-size: clamp(0.8rem, 1.3vw, 0.95rem); text-decoration: none; border: none; cursor: none; transition: all 0.3s ease; display: inline-block; text-align: center; }
         .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 40px var(--wine-glow); }
-        .btn-secondary { background: transparent; color: var(--text-dim); padding: 0.9rem 2rem; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.1); font-family: 'Vazirmatn', 'Comic Neue', sans-serif; font-size: clamp(0.8rem, 1.3vw, 0.95rem); text-decoration: none; cursor: none; transition: all 0.3s ease; display: inline-block; text-align: center; }
+        .btn-secondary { background: transparent; color: var(--text-dim); padding: 0.9rem 2rem; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.1); font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.8rem, 1.3vw, 0.95rem); text-decoration: none; cursor: none; transition: all 0.3s ease; display: inline-block; text-align: center; }
         .btn-secondary:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
 
         /* ==================== SERVICES ==================== */
@@ -221,9 +222,9 @@
         @keyframes statusPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(0, 255, 136, 0); } }
         .booking-status-text { font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.6rem, 1vw, 0.75rem); color: #00ff88; }
         .booking-label { font-size: clamp(0.7rem, 1.1vw, 0.8rem); color: var(--text-dimmer); margin-bottom: 0.5rem; }
-        .booking-input { width: 100%; background: var(--surface2); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.9rem 1rem; color: white; font-family: 'Vazirmatn', 'Comic Neue', sans-serif; font-size: clamp(0.85rem, 1.3vw, 1rem); outline: none; transition: all 0.3s ease; cursor: none; margin-bottom: 1rem; }
+        .booking-input { width: 100%; background: var(--surface2); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.9rem 1rem; color: white; font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.85rem, 1.3vw, 1rem); outline: none; transition: all 0.3s ease; cursor: none; margin-bottom: 1rem; }
         .booking-input:focus { border-color: var(--wine); box-shadow: 0 0 0 4px rgba(114, 47, 55, 0.1); }
-        .booking-btn { width: 100%; background: var(--wine); color: white; border: none; border-radius: 12px; padding: 1rem; font-family: 'Vazirmatn', 'Comic Neue', sans-serif; font-weight: 700; font-size: clamp(0.85rem, 1.3vw, 1rem); cursor: none; transition: all 0.3s ease; }
+        .booking-btn { width: 100%; background: var(--wine); color: white; border: none; border-radius: 12px; padding: 1rem; font-family: 'Vazirmatn', sans-serif; font-weight: 700; font-size: clamp(0.85rem, 1.3vw, 1rem); cursor: none; transition: all 0.3s ease; }
         .booking-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px var(--wine-glow); }
         .booking-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
         .booking-note { font-size: clamp(0.55rem, 0.9vw, 0.65rem); color: var(--text-dimmer); text-align: center; margin-top: 0.75rem; }
@@ -240,7 +241,7 @@
         .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 6px; position: relative; z-index: 1; }
         .cal-weekday { text-align: center; font-family: 'Vazirmatn', sans-serif; font-size: 0.55rem; color: var(--text-dimmer); padding: 4px 0; font-weight: 700; }
         .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; position: relative; z-index: 1; }
-        .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: clamp(0.65rem, 1vw, 0.8rem); cursor: none; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); position: relative; border: 1.5px solid transparent; color: var(--text-dim); font-family: 'Vazirmatn', 'Comic Neue', sans-serif; }
+        .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: clamp(0.65rem, 1vw, 0.8rem); cursor: none; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); position: relative; border: 1.5px solid transparent; color: var(--text-dim); font-family: 'Vazirmatn', sans-serif; }
         .cal-day:hover:not(.empty):not(.past):not(.full) { border-color: var(--wine); background: rgba(114,47,55,0.15); color: var(--text); transform: scale(1.15); box-shadow: 0 4px 15px rgba(114,47,55,0.2); }
         .cal-day.today { border-color: var(--gold); color: var(--gold); font-weight: 700; background: rgba(201, 168, 76, 0.1); }
         .cal-day.today::after { content: ''; position: absolute; bottom: 3px; width: 5px; height: 5px; background: var(--gold); border-radius: 50%; animation: todayPulse 2s ease-in-out infinite; }
@@ -1027,8 +1028,8 @@
                     <div class="slots-empty" id="slotsEmpty"><span style="font-size:1.2rem;color:var(--wine);">&#9650;</span> اول تقویم یه روز انتخاب کن</div>
                 </div>
 
-                <!-- Bookings Panel -->
-                <div class="bookings-panel" id="bookingsPanel" style="display:none;">
+                <!-- Bookings Panel (hidden — bookings now go to Telegram group) -->
+                <div class="bookings-panel" id="bookingsPanel" style="display:none !important;">
                     <div class="bookings-panel-title"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> نوبت‌های ثبت شده این روز</div>
                     <div id="bookingsList"></div>
                 </div>
@@ -1876,27 +1877,8 @@
             const dayBookings = getBookingsForDate(dateKey);
             slotsTitle.textContent = `${toPersianNum(selectedDate)} ${persianMonths[currentMonth]} — وقت‌های خالی:`;
 
-            // Render bookings panel
-            if (dayBookings.length > 0) {
-                bookingsPanel.style.display = 'block';
-                bookingsList.innerHTML = '';
-                dayBookings.sort((a, b) => timeSlots.indexOf(a.time) - timeSlots.indexOf(b.time));
-                dayBookings.forEach(b => {
-                    const entry = document.createElement('div');
-                    entry.className = 'booking-entry';
-                    entry.innerHTML = `
-                        <div class="booking-entry-time">${escapeHtml(b.time)}</div>
-                        <div class="booking-entry-icon ${escapeHtml(b.service)}">${smallIcons[b.service] || smallIcons.hair}</div>
-                        <div class="booking-entry-info">
-                            <div class="booking-entry-name">${escapeHtml(b.name)}</div>
-                            <div class="booking-entry-service">${escapeHtml(serviceNames[b.service])}${b.stylist && b.stylist !== 'any' ? ' — ' + escapeHtml(stylistNames[b.stylist]) : ''}</div>
-                        </div>
-                    `;
-                    bookingsList.appendChild(entry);
-                });
-            } else {
-                bookingsPanel.style.display = 'none';
-            }
+            // Bookings panel hidden — bookings now go to Telegram group
+            bookingsPanel.style.display = 'none';
 
             slotsGrid.innerHTML = '';
 
