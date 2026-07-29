@@ -1826,10 +1826,36 @@
         ];
 
         const takenSlots = {};
-        // Load bookings from localStorage
-        let bookings;
-        try { bookings = JSON.parse(localStorage.getItem('dashakolBookings')); if (!bookings || typeof bookings !== 'object') bookings = {}; } catch { bookings = {}; }
-        function saveBookings() { try { localStorage.setItem('dashakolBookings', JSON.stringify(bookings)); } catch {} }
+        let bookings = {};
+        try { const saved = localStorage.getItem('dashakolBookings'); if (saved) bookings = JSON.parse(saved); } catch {}
+
+        function saveBookingsLocal() { try { localStorage.setItem('dashakolBookings', JSON.stringify(bookings)); } catch {} }
+
+        async function loadBookingsFromServer() {
+            try {
+                const res = await fetch('/api/bookings');
+                if (res.ok) {
+                    const serverBookings = await res.json();
+                    bookings = serverBookings;
+                    saveBookingsLocal();
+                    Object.keys(takenSlots).forEach(k => delete takenSlots[k]);
+                    renderCalendar();
+                    if (selectedDate) renderSlots();
+                }
+            } catch {}
+        }
+
+        async function saveBookingToServer(dateKey, slot) {
+            try {
+                await fetch('/api/bookings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date_key: dateKey, time: slot.time, name: slot.name, phone: slot.phone, service: slot.service, stylist: slot.stylist })
+                });
+            } catch {}
+        }
+
+        loadBookingsFromServer();
         const serviceNames = { hair: 'اصلاح مو', beard: 'فرم دهی ریش', classic: 'اصلاح کلاسیک', texturize: 'پیتاژ', full: 'پکیج مرد کامل', groom: 'پکیج داماد' };
         const stylistNames = { any: 'هرکی خالی باشه', reza: 'رضا', mehdi: 'مهدی', amir: 'امیر', saeid: 'سعید' };
 
@@ -2143,8 +2169,10 @@
             // Store the real booking
             if (!bookings[dateKey]) bookings[dateKey] = [];
             const bookedSlot = selectedSlot;
-            bookings[dateKey].push({ time: bookedSlot, name, phone, service, stylist });
-            saveBookings(); // persist to localStorage
+            const bookingData = { time: bookedSlot, name, phone, service, stylist };
+            bookings[dateKey].push(bookingData);
+            saveBookingsLocal();
+            saveBookingToServer(dateKey, bookingData);
             delete takenSlots[dateKey]; // invalidate cache
             selectedSlot = null;
 
