@@ -1054,6 +1054,8 @@
                     <option value="amir">امیر — متخصص پیتاژ</option>
                     <option value="saeid">سعید — کلاسیک‌کار حرفه‌ای</option>
                 </select>
+                <div class="booking-label">آیدی تلگرام (اختیاری — برای اطلاع از وضعیت نوبت)</div>
+                <input type="text" class="booking-input" id="bookTelegram" placeholder="مثلاً: ali_reza" style="direction: ltr; text-align: left;">
                 <button type="button" class="booking-btn" id="bookBtn" disabled>اول یه وقت انتخاب کن</button>
                 <p class="booking-note">بعد از رزرو، یه پیام میدیم که بیا. جای نگرانی نیست.</p>
             </div>
@@ -1735,14 +1737,16 @@
             } catch {}
         }
 
-        async function saveBookingToServer(dateKey, slot) {
+        async function saveBookingToServer(dateKey, slot, telegramUsername) {
             try {
-                await fetch('/api/bookings', {
+                const res = await fetch('/api/bookings', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ date_key: dateKey, time: slot.time, name: slot.name, phone: slot.phone, service: slot.service, stylist: slot.stylist })
+                    body: JSON.stringify({ date_key: dateKey, time: slot.time, name: slot.name, phone: slot.phone, service: slot.service, stylist: slot.stylist, telegram_username: telegramUsername || null })
                 });
-            } catch {}
+                const data = await res.json();
+                return data.booking_id || null;
+            } catch { return null; }
         }
 
         loadBookingsFromServer();
@@ -2046,6 +2050,7 @@
             const phone = bookPhone.value.trim();
             const service = bookService.value;
             const stylist = bookStylist.value;
+            const telegramUsername = document.getElementById('bookTelegram').value.trim().replace(/^@/, '');
 
             if (!name) { bookName.style.borderColor = '#e53935'; bookName.focus(); return; }
             if (!phone || !isValidIranPhone(phone)) { bookPhone.style.borderColor = '#e53935'; bookPhone.focus(); return; }
@@ -2056,13 +2061,7 @@
             const slotIdx = timeSlots.indexOf(selectedSlot);
             if (slotIdx !== -1) taken.add(slotIdx);
 
-            // Store the real booking
-            if (!bookings[dateKey]) bookings[dateKey] = [];
             const bookedSlot = selectedSlot;
-            const bookingData = { time: bookedSlot, name, phone, service, stylist };
-            bookings[dateKey].push(bookingData);
-            saveBookingsLocal();
-            saveBookingToServer(dateKey, bookingData);
             delete takenSlots[dateKey]; // invalidate cache
             selectedSlot = null;
 
@@ -2074,12 +2073,21 @@
             bookBtn.textContent = 'داره ارسال میشه...';
             isBooking = true;
 
-            fetch('/api/telegram', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, phone, service: serviceNames[service], stylist: stylistNames[stylist], date: `${selectedDayName} ${dateStr}`, time: bookedSlot, joke: `${joke.icon} ${joke.text}` })
-            })
-            .then(r => r.json())
+            // First save to DB to get booking_id, then send telegram
+            saveBookingToServer(dateKey, { time: bookedSlot, name, phone, service, stylist }, telegramUsername)
+                .then(bookingId => {
+                    // Store locally
+                    if (!bookings[dateKey]) bookings[dateKey] = [];
+                    bookings[dateKey].push({ time: bookedSlot, name, phone, service, stylist });
+                    saveBookingsLocal();
+
+                    return fetch('/api/telegram', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, phone, service: serviceNames[service], stylist: stylistNames[stylist], date: `${selectedDayName} ${dateStr}`, time: bookedSlot, joke: `${joke.icon} ${joke.text}`, telegram_username: telegramUsername || null, booking_id: bookingId })
+                    });
+                })
+                .then(r => r.json())
             .then(data => {
                 if (data.success) {
                     bookName.value = '';
