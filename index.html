@@ -2152,143 +2152,17 @@
             const dayOfWeek = getJalaliDayOfWeek(currentYear, currentMonth + 1, selectedDate);
             const selectedDayName = persianDayNames[dayOfWeek];
 
-            // SVG icons for email (inline, no emojis)
-            const svgScissors = '<svg width="28" height="28" viewBox="0 0 20 20" fill="none" stroke="#722F37" stroke-width="1"><circle cx="10" cy="11" r="5"/><circle cx="8.5" cy="10" r="0.8" fill="#722F37"/><circle cx="11.5" cy="10" r="0.8" fill="#722F37"/><path d="M9 13 Q10 14 11 13" stroke-width="0.7"/><line x1="7" y1="7" x2="5.5" y2="3" stroke-linecap="round"/><line x1="10" y1="6" x2="10" y2="2.5" stroke-linecap="round"/><line x1="13" y1="7" x2="14.5" y2="3" stroke-linecap="round"/></svg>';
-            const svgRazor = '<svg width="28" height="28" viewBox="0 0 20 20" fill="none" stroke="#722F37" stroke-width="1"><circle cx="10" cy="9" r="5"/><circle cx="8.5" cy="8.5" r="0.6" fill="#722F37"/><circle cx="11.5" cy="8.5" r="0.6" fill="#722F37"/><path d="M8 14 Q10 18 12 14" stroke-width="0.8"/></svg>';
-            const svgShield = '<svg width="28" height="28" viewBox="0 0 20 20" fill="none" stroke="#722F37" stroke-width="1"><circle cx="10" cy="10" r="5"/><path d="M7 7 L9 6 L11 7 L13 6 L15 7" stroke-width="0.7" stroke-linecap="round"/><path d="M9 11 L10 12 L11 11" stroke-width="0.7"/></svg>';
-            const svgScissors2 = '<svg width="28" height="28" viewBox="0 0 20 20" fill="none" stroke="#722F37" stroke-width="1"><circle cx="10" cy="11" r="5"/><circle cx="9" cy="10" r="1"/><circle cx="11" cy="10" r="1"/><line x1="10" y1="6" x2="10" y2="3" stroke-linecap="round"/><line x1="13" y1="7" x2="15" y2="4" stroke-linecap="round"/><line x1="7" y1="7" x2="5" y2="4" stroke-linecap="round"/></svg>';
-            const svgPole = '<svg width="28" height="28" viewBox="0 0 20 20" fill="none" stroke="#722F37" stroke-width="1"><circle cx="10" cy="10" r="5"/><path d="M7 7 L9 6 L11 7 L13 6 L15 7" stroke-width="0.6" stroke-linecap="round"/><path d="M8 14 Q10 17 12 14" stroke-width="0.7"/><circle cx="9" cy="9.5" r="0.5" fill="#722F37"/><circle cx="11" cy="9.5" r="0.5" fill="#722F37"/></svg>';
-            const serviceSvgs = { hair: svgScissors, beard: svgRazor, classic: svgShield, texturize: svgScissors2, full: svgPole, groom: svgScissors };
-            const logoSvg = '<svg width="36" height="36" viewBox="0 0 20 20" fill="none" stroke="white" stroke-width="1"><circle cx="10" cy="11" r="5"/><circle cx="8.5" cy="10" r="0.8" fill="white"/><circle cx="11.5" cy="10" r="0.8" fill="white"/><path d="M9 13 Q10 14 11 13" stroke-width="0.7"/><line x1="7" y1="7" x2="5.5" y2="3" stroke-linecap="round"/><line x1="10" y1="6" x2="10" y2="2.5" stroke-linecap="round"/><line x1="13" y1="7" x2="14.5" y2="3" stroke-linecap="round"/></svg>';
-            const phoneSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#722F37" stroke-width="1.5" style="vertical-align:middle;margin-right:6px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
-            const clockSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5" style="vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
-
-            // Build email HTML body - luxurious premium design
-            const joke = dayJokes[dayOfWeek];
-            const emailHtml = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#050508;font-family:'Vazirmatn',Tahoma,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#050508;padding:30px 15px;">
-<tr><td align="center">
-<table width="520" cellpadding="0" cellspacing="0" style="background:linear-gradient(180deg,#0c0c12 0%,#08080c 100%);border-radius:24px;overflow:hidden;border:1px solid rgba(201,168,76,0.15);">
-  <!-- Gold top bar -->
-  <tr><td style="height:3px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);"></td></tr>
-  <!-- Header -->
-  <tr><td style="background:linear-gradient(135deg,#1a0a10 0%,#1A1A3E 50%,#0c0c12 100%);padding:35px 30px;text-align:center;position:relative;">
-    <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 50% 0%,rgba(201,168,76,0.12) 0%,transparent 60%);"></div>
-    <div style="position:relative;">
-      <div style="width:70px;height:70px;margin:0 auto 12px;background:linear-gradient(135deg,#c9a84c,#a8862c);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(201,168,76,0.3),0 0 80px rgba(201,168,76,0.1);">${logoSvg}</div>
-      <div style="color:#c9a84c;font-size:11px;letter-spacing:6px;text-transform:uppercase;margin-bottom:6px;">RESERVATION CONFIRMED</div>
-      <div style="color:#fff;font-size:28px;font-weight:900;letter-spacing:1px;">داش آکل</div>
-      <div style="color:rgba(201,168,76,0.6);font-size:11px;margin-top:6px;letter-spacing:2px;">SALON-E MERDANEH</div>
-      <div style="width:50px;height:1px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);margin:15px auto 0;"></div>
-    </div>
-  </td></tr>
-  <!-- Confirmation badge -->
-  <tr><td style="padding:25px 30px 0;text-align:center;">
-    <div style="display:inline-block;padding:10px 28px;border:1px solid rgba(201,168,76,0.3);border-radius:100px;background:rgba(201,168,76,0.06);">
-      <span style="color:#c9a84c;font-size:13px;font-weight:700;">نوبت شما با موفقیت ثبت شد</span>
-    </div>
-  </td></tr>
-  <!-- Service icon -->
-  <tr><td style="padding:20px 30px 0;text-align:center;">
-    <div style="width:60px;height:60px;margin:0 auto;background:rgba(114,47,55,0.1);border-radius:50%;border:1px solid rgba(114,47,55,0.2);display:flex;align-items:center;justify-content:center;">${serviceSvgs[service] || svgScissors}</div>
-  </td></tr>
-  <!-- Details card -->
-  <tr><td style="padding:20px 30px;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(255,255,255,0.02);border-radius:16px;border:1px solid rgba(255,255,255,0.05);overflow:hidden;">
-      <tr><td style="padding:16px 22px;border-bottom:1px solid rgba(255,255,255,0.04);">
-        <table width="100%" cellpadding="0" cellspacing="0"><tr>
-          <td style="color:#7a7880;font-size:11px;">نام مشتری</td>
-          <td dir="rtl" style="text-align:left;color:#e8e6e3;font-size:15px;font-weight:700;">${escapeHtml(name)}</td>
-        </tr></table>
-      </td></tr>
-      <tr><td style="padding:16px 22px;border-bottom:1px solid rgba(255,255,255,0.04);">
-        <table width="100%" cellpadding="0" cellspacing="0"><tr>
-          <td style="color:#7a7880;font-size:11px;">شماره تماس</td>
-          <td dir="ltr" style="text-align:left;color:#e8e6e3;font-size:15px;font-weight:700;">${escapeHtml(phone)}</td>
-        </tr></table>
-      </td></tr>
-      <tr><td style="padding:16px 22px;border-bottom:1px solid rgba(255,255,255,0.04);">
-        <table width="100%" cellpadding="0" cellspacing="0"><tr>
-          <td style="color:#7a7880;font-size:11px;">سرویس</td>
-          <td dir="rtl" style="text-align:left;color:#722F37;font-size:15px;font-weight:700;">${serviceNames[service]}</td>
-        </tr></table>
-      </td></tr>
-      <tr><td style="padding:16px 22px;border-bottom:1px solid rgba(255,255,255,0.04);">
-        <table width="100%" cellpadding="0" cellspacing="0"><tr>
-          <td style="color:#7a7880;font-size:11px;">استایلیست</td>
-          <td dir="rtl" style="text-align:left;color:#c9a84c;font-size:15px;font-weight:700;">${stylistNames[stylist]}</td>
-        </tr></table>
-      </td></tr>
-      <tr><td style="padding:16px 22px;border-bottom:1px solid rgba(255,255,255,0.04);">
-        <table width="100%" cellpadding="0" cellspacing="0"><tr>
-          <td style="color:#7a7880;font-size:11px;">تاریخ</td>
-          <td dir="rtl" style="text-align:left;color:#e8e6e3;font-size:15px;font-weight:700;">${selectedDayName} ${dateStr}</td>
-        </tr></table>
-      </td></tr>
-      <tr><td style="padding:16px 22px;">
-        <table width="100%" cellpadding="0" cellspacing="0"><tr>
-          <td style="color:#7a7880;font-size:11px;">ساعت</td>
-          <td dir="rtl" style="text-align:left;color:#c9a84c;font-size:22px;font-weight:900;">${clockSvg} ${bookedSlot}</td>
-        </tr></table>
-      </td></tr>
-    </table>
-  </td></tr>
-  <!-- Joke box -->
-  <tr><td style="padding:0 30px 20px;">
-    <div style="background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.1);border-radius:14px;padding:18px 20px;text-align:center;">
-      <div style="color:#c9a84c;font-size:16px;margin-bottom:6px;">${joke.icon}</div>
-      <div style="color:rgba(255,255,255,0.5);font-size:12px;line-height:1.8;">${joke.text}</div>
-    </div>
-  </td></tr>
-  <!-- Contact CTA -->
-  <tr><td style="padding:0 30px 25px;">
-    <div style="background:linear-gradient(135deg,rgba(114,47,55,0.08),rgba(114,47,55,0.04));border:1px solid rgba(114,47,55,0.15);border-radius:14px;padding:20px;text-align:center;">
-      <div style="color:#7a7880;font-size:11px;margin-bottom:6px;">جهت تایید، تغییر یا لغو نوبت</div>
-      <div style="color:#722F37;font-size:18px;font-weight:900;" dir="ltr">${phoneSvg} 09121234567</div>
-    </div>
-  </td></tr>
-  <!-- Gold bottom bar -->
-  <tr><td style="height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);"></td></tr>
-  <!-- Footer -->
-  <tr><td style="padding:18px;text-align:center;">
-    <div style="color:#3d3b44;font-size:10px;">داش آکل — تمامی حقوق موها محفوظ است</div>
-  </td></tr>
-</table>
-</td></tr></table>
-</body></html>`;
-
-            // Send via FormSubmit.co (silent, no email client opens)
-            const formData = new FormData();
-            formData.append('name', name);
-            formData.append('phone', phone);
-            formData.append('service', serviceNames[service]);
-            formData.append('stylist', stylistNames[stylist]);
-            formData.append('date', `${selectedDayName} ${dateStr}`);
-            formData.append('time', bookedSlot);
-            formData.append('_subject', `نوبت ثبت شد — ${name} | داش آکل`);
-            formData.append('_captcha', 'false');
-            formData.append('_template', 'table');
-            formData.append('_html', emailHtml);
-            formData.append('message', `نوبت شما ثبت شد!\n\nنام: ${name}\nتلفن: ${phone}\nسرویس: ${serviceNames[service]}\nاستایلیست: ${stylistNames[stylist]}\nتاریخ: ${selectedDayName} ${dateStr}\nساعت: ${bookedSlot}\n\n${joke.icon} ${joke.text}\n\nداش آکل — تمامی حقوق موها محفوظ است`);
-
             bookBtn.textContent = 'داره ارسال میشه...';
             isBooking = true;
 
-            Promise.all([
-                fetch('https://formsubmit.co/ajax/ali.peirovii@gmail.com', {
-                    method: 'POST',
-                    body: formData
-                }).then(r => r.json()),
-                fetch('/api/telegram', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, phone, service: serviceNames[service], stylist: stylistNames[stylist], date: `${selectedDayName} ${dateStr}`, time: bookedSlot, joke: `${joke.icon} ${joke.text}` })
-                }).then(r => r.json()).catch(() => ({ success: true }))
-            ])
-            .then(([emailData]) => {
-                if (emailData.success) {
+            fetch('/api/telegram', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, phone, service: serviceNames[service], stylist: stylistNames[stylist], date: `${selectedDayName} ${dateStr}`, time: bookedSlot, joke: `${joke.icon} ${joke.text}` })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
                     bookName.value = '';
                     bookPhone.value = '';
                     selectedSlot = null;
@@ -2296,7 +2170,7 @@
                     renderSlots();
                     showBookingModal(selectedDayName, dateStr, bookedSlot, serviceNames[service], stylistNames[stylist], name, joke.text, joke.icon);
                 } else {
-                    showBookingModal(selectedDayName, dateStr, bookedSlot, serviceNames[service], stylistNames[stylist], name, 'ایمیل تایید مشکل داشت. با شماره ۰۹۱۲۱۲۳۴۵۶۷ تماس بگیرید.', '⚠');
+                    showBookingModal(selectedDayName, dateStr, bookedSlot, serviceNames[service], stylistNames[stylist], name, 'ارسال با مشکل مواجه شد. با شماره ۰۹۱۲۱۲۳۴۵۶۷ تماس بگیرید.', '⚠');
                 }
             })
             .catch(() => {
