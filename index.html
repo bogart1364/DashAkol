@@ -32,7 +32,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='34' r='28' fill='%230a0a0a' stroke='%23722F37' stroke-width='2'/%3E%3Ccircle cx='32' cy='34' r='24' fill='none' stroke='%23c9a84c' stroke-width='1'/%3E%3Cpath d='M12 28 Q14 8 28 18 Q26 2 36 14 Q40 0 46 14 Q54 6 56 22' fill='%231a0f05' stroke='none'/%3E%3Cpath d='M12 28 Q16 16 32 14 Q48 16 56 28' fill='%232a1a0a' stroke='none'/%3E%3Ccircle cx='24' cy='30' r='3.5' fill='white'/%3E%3Ccircle cx='24' cy='30' r='1.8' fill='%231a0f05'/%3E%3Ccircle cx='25' cy='29' r='0.7' fill='white'/%3E%3Ccircle cx='40' cy='30' r='3.5' fill='white'/%3E%3Ccircle cx='40' cy='30' r='1.8' fill='%231a0f05'/%3E%3Ccircle cx='41' cy='29' r='0.7' fill='white'/%3E%3Cpath d='M20 24 Q27 20 34 24' fill='none' stroke='%231a0f05' stroke-width='1.5' stroke-linecap='round'/%3E%3Cpath d='M30 24 Q37 20 44 24' fill='none' stroke='%231a0f05' stroke-width='1.5' stroke-linecap='round'/%3E%3Cpath d='M24 42 Q32 50 40 42' fill='none' stroke='%23c0392b' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='M27 43 Q32 47 38 43' fill='%23e74c3c' opacity='0.3'/%3E%3Cpath d='M29 34 Q32 38 35 34' fill='none' stroke='%23c9a07a' stroke-width='1'/%3E%3Cpath d='M18 48 Q20 56 32 58 Q44 56 46 48' fill='%231a0f05' stroke='none'/%3E%3Cpath d='M20 48 Q22 52 32 54 Q42 52 44 48' fill='%232a1a0a' stroke='none'/%3E%3Cline x1='14' y1='52' x2='6' y2='48' stroke='%23aaa' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='14' y1='52' x2='6' y2='56' stroke='%23aaa' stroke-width='2' stroke-linecap='round'/%3E%3Cellipse cx='5' cy='46' rx='2.5' ry='2.5' fill='none' stroke='%23aaa' stroke-width='1.2'/%3E%3Cellipse cx='5' cy='58' rx='2.5' ry='2.5' fill='none' stroke='%23aaa' stroke-width='1.2'/%3E%3Ctext x='32' y='62' text-anchor='middle' fill='%23c9a84c' font-size='7' font-family='serif' font-weight='bold'%3E%D8%AF%D8%A7%D8%B4%3C/text%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
 
         :root {
@@ -80,7 +80,7 @@
 
         #preloader { position: fixed; inset: 0; z-index: 99999; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
         #preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .preloader-text { font-family: 'Lalezar', cursive; font-size: clamp(1.2rem, 4vw, 2.5rem); color: var(--wine); letter-spacing: 0.3em; font-weight: 400; }
+        .preloader-text { font-family: 'Baloo 2', cursive; font-size: clamp(1.2rem, 4vw, 2.5rem); color: var(--wine); letter-spacing: 0.3em; font-weight: 400; }
         .preloader-bar { width: 150px; height: 2px; background: var(--surface2); margin-top: 2rem; border-radius: 1px; overflow: hidden; }
         .preloader-bar-inner { width: 0%; height: 100%; background: linear-gradient(90deg, var(--wine), var(--navy-light)); transition: width 0.2s ease; }
 
@@ -102,7 +102,7 @@
         .hero-text { }
         .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.55rem, 1.2vw, 0.7rem); color: var(--gold); padding: 0.5rem 1.2rem; border-radius: 100px; background: var(--gold-dim); margin-bottom: 2rem; opacity: 0; animation: comicPop 0.8s ease 0.5s forwards; border: 1px solid rgba(201,168,76,0.2); }
         .hero-badge-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
-        .hero-title { font-family: 'Lalezar', cursive; font-size: clamp(3rem, 8vw, 7rem); font-weight: 400; line-height: 0.95; letter-spacing: -0.02em; margin-bottom: 1.5rem; opacity: 0; animation: fadeInUp 1s ease 0.7s forwards; color: var(--wine); text-shadow: 3px 3px 0 var(--navy), 6px 6px 0 rgba(26,26,62,0.4), 0 0 40px rgba(114,47,55,0.3); -webkit-text-stroke: 1px rgba(201,168,76,0.15); }
+        .hero-title { font-family: 'Baloo 2', cursive; font-size: clamp(3rem, 8vw, 7rem); font-weight: 400; line-height: 0.95; letter-spacing: -0.02em; margin-bottom: 1.5rem; opacity: 0; animation: fadeInUp 1s ease 0.7s forwards; color: var(--wine); text-shadow: 3px 3px 0 var(--navy), 6px 6px 0 rgba(26,26,62,0.4), 0 0 40px rgba(114,47,55,0.3); -webkit-text-stroke: 1px rgba(201,168,76,0.15); }
         .hero-title span { display: block; }
         @media (max-width: 600px) { .hero-title span { display: inline; } }
         .hero-title .accent { color: var(--wine); }
@@ -126,7 +126,7 @@
         /* ==================== SERVICES ==================== */
         .section-header { text-align: center; margin-bottom: clamp(2rem, 5vw, 4rem); }
         .section-badge { font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.55rem, 1vw, 0.65rem); color: var(--gold); }
-        .section-title { font-family: 'Lalezar', cursive; font-size: clamp(2rem, 5vw, 4rem); font-weight: 400; margin-top: 0.75rem; letter-spacing: -0.01em; color: var(--text); text-shadow: 2px 2px 0 var(--wine-dark), 4px 4px 0 rgba(114,47,55,0.3); }
+        .section-title { font-family: 'Baloo 2', cursive; font-size: clamp(2rem, 5vw, 4rem); font-weight: 400; margin-top: 0.75rem; letter-spacing: -0.01em; color: var(--text); text-shadow: 2px 2px 0 var(--wine-dark), 4px 4px 0 rgba(114,47,55,0.3); }
         .section-desc { color: var(--text-dim); margin-top: 0.75rem; max-width: 550px; margin-left: auto; margin-right: auto; font-size: clamp(0.85rem, 1.5vw, 1rem); line-height: 1.8; }
 
         .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: clamp(1rem, 2vw, 1.5rem); }
@@ -193,9 +193,9 @@
         .icon-meme::after { content: ''; position: absolute; top: -4px; right: -4px; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; animation: memeDot 1.5s ease-in-out infinite; }
         @keyframes memeDot { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } }
         .service-number { font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.55rem, 1vw, 0.65rem); color: var(--wine-light); margin-bottom: 0.5rem; }
-        .service-title { font-family: 'Lalezar', cursive; font-size: clamp(1.2rem, 2vw, 1.5rem); font-weight: 400; margin-bottom: 0.75rem; text-shadow: 1px 1px 0 var(--wine-dark); }
+        .service-title { font-family: 'Baloo 2', cursive; font-size: clamp(1.2rem, 2vw, 1.5rem); font-weight: 400; margin-bottom: 0.75rem; text-shadow: 1px 1px 0 var(--wine-dark); }
         .service-desc { color: var(--text-dim); line-height: 1.8; flex: 1; font-size: clamp(0.8rem, 1.2vw, 0.9rem); }
-        .service-price { font-family: 'Lalezar', cursive; font-size: clamp(1rem, 1.8vw, 1.3rem); color: var(--gold); font-weight: 400; margin-top: auto; }
+        .service-price { font-family: 'Baloo 2', cursive; font-size: clamp(1rem, 1.8vw, 1.3rem); color: var(--gold); font-weight: 400; margin-top: auto; }
 
         /* ==================== STYLISTS ==================== */
         .stylists-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; max-width: 1200px; margin: 0 auto; }
@@ -208,10 +208,10 @@
         .stylist-card:hover .stylist-svg { transform: scale(1.08) rotate(-3deg); filter: drop-shadow(0 8px 20px rgba(114,47,55,0.3)); }
         .stylist-glow { position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 80px; height: 80px; background: radial-gradient(circle, rgba(114, 47, 55, 0.2), transparent 70%); border-radius: 50%; pointer-events: none; opacity: 0; transition: opacity 0.5s; }
         .stylist-card:hover .stylist-glow { opacity: 1; }
-        .stylist-name { font-family: 'Lalezar', cursive; font-size: clamp(1rem, 1.8vw, 1.25rem); color: var(--gold); margin-bottom: 0.8rem; }
+        .stylist-name { font-family: 'Baloo 2', cursive; font-size: clamp(1rem, 1.8vw, 1.25rem); color: var(--gold); margin-bottom: 0.8rem; }
         .stylist-bio { color: var(--text-dim); font-size: clamp(0.78rem, 1.1vw, 0.88rem); line-height: 1.9; margin-bottom: 1rem; }
         .stylist-tags { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; }
-        .stylist-tag { font-family: 'Lalezar', cursive; font-size: 0.7rem; color: var(--text-dimmer); letter-spacing: 0.02em; }
+        .stylist-tag { font-family: 'Baloo 2', cursive; font-size: 0.7rem; color: var(--text-dimmer); letter-spacing: 0.02em; }
 
         @keyframes stylistBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
         .stylist-card:hover .stylist-svg { animation: stylistBounce 1.5s ease-in-out infinite; }
@@ -238,7 +238,7 @@
         .cal-wrapper::before { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(114, 47, 55, 0.08) 0%, transparent 70%); pointer-events: none; }
         .cal-wrapper::after { content: ''; position: absolute; bottom: -30%; left: -30%; width: 80%; height: 80%; background: radial-gradient(circle, rgba(201, 168, 76, 0.05) 0%, transparent 70%); pointer-events: none; }
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; position: relative; z-index: 1; }
-        .cal-title { font-family: 'Lalezar', cursive; font-size: clamp(0.85rem, 1.4vw, 1.05rem); color: var(--gold); letter-spacing: 0.05em; text-shadow: 0 0 20px rgba(201, 168, 76, 0.3); }
+        .cal-title { font-family: 'Baloo 2', cursive; font-size: clamp(0.85rem, 1.4vw, 1.05rem); color: var(--gold); letter-spacing: 0.05em; text-shadow: 0 0 20px rgba(201, 168, 76, 0.3); }
         .cal-nav { display: flex; gap: 0.5rem; }
         .cal-nav button { background: var(--surface); border: 1.5px solid rgba(255,255,255,0.1); color: var(--text-dim); width: 34px; height: 34px; border-radius: 10px; cursor: none; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
         .cal-nav button:hover { border-color: var(--wine); color: var(--wine-light); background: rgba(114,47,55,0.15); transform: scale(1.1); box-shadow: 0 4px 15px rgba(114,47,55,0.2); }
@@ -430,7 +430,7 @@
         .modal-gold-bar { height: 3px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
         .modal-header { text-align: center; padding: 2rem 2rem 0; }
         .modal-crown { width: 60px; height: 60px; margin: 0 auto 1rem; background: linear-gradient(135deg, var(--gold), #a8862c); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(201,168,76,0.3), 0 0 60px rgba(201,168,76,0.1); }
-        .modal-title { font-family: 'Lalezar', cursive; font-size: 1.5rem; color: var(--gold); margin-bottom: 0.3rem; text-shadow: 2px 2px 0 var(--wine-dark); }
+        .modal-title { font-family: 'Baloo 2', cursive; font-size: 1.5rem; color: var(--gold); margin-bottom: 0.3rem; text-shadow: 2px 2px 0 var(--wine-dark); }
         .modal-subtitle { color: var(--text-dim); font-size: 0.8rem; }
         .modal-divider { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 1.2rem auto; }
         .modal-details { padding: 0 2rem; }
@@ -1363,7 +1363,7 @@
                                     <line x1="22" y1="11" x2="23" y2="4" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"/>
                                     <line x1="26" y1="12" x2="28" y2="5" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"/>
                                 </g>
-                                <text x="20" y="37" text-anchor="middle" fill="var(--wine-light)" font-size="5" font-family="'Lalezar', cursive">!WOW</text>
+                                <text x="20" y="37" text-anchor="middle" fill="var(--wine-light)" font-size="5" font-family="'Baloo 2', cursive">!WOW</text>
                             </svg>
                         </div>
                         <div><div class="review-name">محمد رضایی</div><div class="review-date">۲ روز پیش — هنوز شوکه‌ست</div></div>
@@ -1385,7 +1385,7 @@
                                 <path d="M16 21 L18 21" stroke="var(--wine-light)" stroke-width="1.5" stroke-linecap="round"/>
                                 <path d="M22 21 L24 21" stroke="var(--wine-light)" stroke-width="1.5" stroke-linecap="round"/>
                                 <path d="M17 26 Q20 28 23 26" fill="none" stroke="var(--wine-light)" stroke-width="1"/>
-                                <text x="20" y="38" text-anchor="middle" fill="var(--gold)" font-size="5" font-family="'Lalezar', cursive">KING</text>
+                                <text x="20" y="38" text-anchor="middle" fill="var(--gold)" font-size="5" font-family="'Baloo 2', cursive">KING</text>
                             </svg>
                         </div>
                         <div><div class="review-name">علی محمدی</div><div class="review-date">۵ روز پیش — هنوز احساس پادشاهی داره</div></div>
@@ -1409,7 +1409,7 @@
                                 <g class="avatar-star-spin">
                                     <polygon points="34,8 35,11 38,11 35.5,13 36.5,16 34,14 31.5,16 32.5,13 30,11 33,11" fill="var(--gold)" opacity="0.7"/>
                                 </g>
-                                <text x="20" y="38" text-anchor="middle" fill="var(--wine-light)" font-size="5" font-family="'Lalezar', cursive">COOL</text>
+                                <text x="20" y="38" text-anchor="middle" fill="var(--wine-light)" font-size="5" font-family="'Baloo 2', cursive">COOL</text>
                             </svg>
                         </div>
                         <div><div class="review-name">رضا عباسی</div><div class="review-date">۱ هفته پیش — الان عادت کرده</div></div>
@@ -1435,7 +1435,7 @@
                                 <g class="avatar-heart-float">
                                     <path d="M8 12 Q8 10 10 10 Q12 10 12 12 Q12 10 14 10 Q16 10 16 12 Q16 16 12 18 Q8 16 8 12" fill="var(--wine)" opacity="0.6"/>
                                 </g>
-                                <text x="20" y="38" text-anchor="middle" fill="var(--gold)" font-size="4.5" font-family="'Lalezar', cursive">LOYAL</text>
+                                <text x="20" y="38" text-anchor="middle" fill="var(--gold)" font-size="4.5" font-family="'Baloo 2', cursive">LOYAL</text>
                             </svg>
                         </div>
                         <div><div class="review-name">حسن کریمی</div><div class="review-date">۲ هفته پیش — الان هر هفته میاد</div></div>
