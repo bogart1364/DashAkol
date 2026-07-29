@@ -33,7 +33,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- no Comic Neue — not imported, was causing fallback issues -->
     <style>
 
         :root {
@@ -81,7 +80,7 @@
 
         #preloader { position: fixed; inset: 0; z-index: 99999; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
         #preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .preloader-text { font-family: 'Lalezar', 'Sigmar One', cursive; font-size: clamp(1.2rem, 4vw, 2.5rem); color: var(--wine); letter-spacing: 0.3em; font-weight: 400; }
+        .preloader-text { font-family: 'Lalezar', cursive; font-size: clamp(1.2rem, 4vw, 2.5rem); color: var(--wine); letter-spacing: 0.3em; font-weight: 400; }
         .preloader-bar { width: 150px; height: 2px; background: var(--surface2); margin-top: 2rem; border-radius: 1px; overflow: hidden; }
         .preloader-bar-inner { width: 0%; height: 100%; background: linear-gradient(90deg, var(--wine), var(--navy-light)); transition: width 0.2s ease; }
 
@@ -91,6 +90,8 @@
         @keyframes floatSlow { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-15px) rotate(2deg); } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @keyframes comicBounce { 0%, 100% { transform: scale(1) rotate(0deg); } 25% { transform: scale(1.05) rotate(-1deg); } 50% { transform: scale(0.98) rotate(0.5deg); } 75% { transform: scale(1.02) rotate(-0.5deg); } }
+        @keyframes comicPop { 0% { transform: scale(0.8) rotate(-3deg); opacity: 0; } 60% { transform: scale(1.05) rotate(1deg); } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
 
 
         section { position: relative; min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 6rem 1.5rem; }
@@ -99,9 +100,9 @@
         /* ==================== HERO ==================== */
         .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
         .hero-text { }
-        .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.55rem, 1.2vw, 0.7rem); color: var(--gold); padding: 0.5rem 1.2rem; border-radius: 100px; background: var(--gold-dim); margin-bottom: 2rem; opacity: 0; animation: fadeInUp 1s ease 0.5s forwards; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.55rem, 1.2vw, 0.7rem); color: var(--gold); padding: 0.5rem 1.2rem; border-radius: 100px; background: var(--gold-dim); margin-bottom: 2rem; opacity: 0; animation: comicPop 0.8s ease 0.5s forwards; border: 1px solid rgba(201,168,76,0.2); }
         .hero-badge-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
-        .hero-title { font-family: 'Lalezar', cursive; font-size: clamp(3rem, 8vw, 7rem); font-weight: 400; line-height: 0.95; letter-spacing: -0.02em; margin-bottom: 1.5rem; opacity: 0; animation: fadeInUp 1s ease 0.7s forwards; }
+        .hero-title { font-family: 'Lalezar', cursive; font-size: clamp(3rem, 8vw, 7rem); font-weight: 400; line-height: 0.95; letter-spacing: -0.02em; margin-bottom: 1.5rem; opacity: 0; animation: fadeInUp 1s ease 0.7s forwards; color: var(--wine); text-shadow: 3px 3px 0 var(--navy), 6px 6px 0 rgba(26,26,62,0.4), 0 0 40px rgba(114,47,55,0.3); -webkit-text-stroke: 1px rgba(201,168,76,0.15); }
         .hero-title span { display: block; }
         @media (max-width: 600px) { .hero-title span { display: inline; } }
         .hero-title .accent { color: var(--wine); }
@@ -116,7 +117,8 @@
         .hero-image { width: 100%; height: 100%; object-fit: contain; transition: filter 0.5s; }
         .hero-image:hover { filter: drop-shadow(0 0 30px rgba(114, 47, 55, 0.3)); }
 
-        .btn-primary { background: var(--wine); color: white; padding: 0.9rem 2rem; border-radius: 10px; font-family: 'Vazirmatn', sans-serif; font-weight: 700; font-size: clamp(0.8rem, 1.3vw, 0.95rem); text-decoration: none; border: none; cursor: none; transition: all 0.3s ease; display: inline-block; text-align: center; }
+        .btn-primary { background: var(--wine); color: white; padding: 0.9rem 2rem; border-radius: 10px; font-family: 'Vazirmatn', sans-serif; font-weight: 700; font-size: clamp(0.8rem, 1.3vw, 0.95rem); text-decoration: none; border: none; cursor: none; transition: all 0.3s ease; display: inline-block; text-align: center; box-shadow: 3px 3px 0 var(--wine-dark); }
+        .btn-primary:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--wine-dark); background: var(--wine-light); }
         .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 40px var(--wine-glow); }
         .btn-secondary { background: transparent; color: var(--text-dim); padding: 0.9rem 2rem; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.1); font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.8rem, 1.3vw, 0.95rem); text-decoration: none; cursor: none; transition: all 0.3s ease; display: inline-block; text-align: center; }
         .btn-secondary:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
@@ -124,7 +126,7 @@
         /* ==================== SERVICES ==================== */
         .section-header { text-align: center; margin-bottom: clamp(2rem, 5vw, 4rem); }
         .section-badge { font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.55rem, 1vw, 0.65rem); color: var(--gold); }
-        .section-title { font-family: 'Lalezar', cursive; font-size: clamp(2rem, 5vw, 4rem); font-weight: 400; margin-top: 0.75rem; letter-spacing: -0.01em; }
+        .section-title { font-family: 'Lalezar', cursive; font-size: clamp(2rem, 5vw, 4rem); font-weight: 400; margin-top: 0.75rem; letter-spacing: -0.01em; color: var(--text); text-shadow: 2px 2px 0 var(--wine-dark), 4px 4px 0 rgba(114,47,55,0.3); }
         .section-desc { color: var(--text-dim); margin-top: 0.75rem; max-width: 550px; margin-left: auto; margin-right: auto; font-size: clamp(0.85rem, 1.5vw, 1rem); line-height: 1.8; }
 
         .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: clamp(1rem, 2vw, 1.5rem); }
@@ -191,7 +193,7 @@
         .icon-meme::after { content: ''; position: absolute; top: -4px; right: -4px; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; animation: memeDot 1.5s ease-in-out infinite; }
         @keyframes memeDot { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } }
         .service-number { font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.55rem, 1vw, 0.65rem); color: var(--wine-light); margin-bottom: 0.5rem; }
-        .service-title { font-family: 'Lalezar', cursive; font-size: clamp(1.2rem, 2vw, 1.5rem); font-weight: 400; margin-bottom: 0.75rem; }
+        .service-title { font-family: 'Lalezar', cursive; font-size: clamp(1.2rem, 2vw, 1.5rem); font-weight: 400; margin-bottom: 0.75rem; text-shadow: 1px 1px 0 var(--wine-dark); }
         .service-desc { color: var(--text-dim); line-height: 1.8; flex: 1; font-size: clamp(0.8rem, 1.2vw, 0.9rem); }
         .service-price { font-family: 'Lalezar', cursive; font-size: clamp(1rem, 1.8vw, 1.3rem); color: var(--gold); font-weight: 400; margin-top: auto; }
 
@@ -224,7 +226,9 @@
         .booking-label { font-size: clamp(0.7rem, 1.1vw, 0.8rem); color: var(--text-dimmer); margin-bottom: 0.5rem; }
         .booking-input { width: 100%; background: var(--surface2); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 0.9rem 1rem; color: white; font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.85rem, 1.3vw, 1rem); outline: none; transition: all 0.3s ease; cursor: none; margin-bottom: 1rem; }
         .booking-input:focus { border-color: var(--wine); box-shadow: 0 0 0 4px rgba(114, 47, 55, 0.1); }
-        .booking-btn { width: 100%; background: var(--wine); color: white; border: none; border-radius: 12px; padding: 1rem; font-family: 'Vazirmatn', sans-serif; font-weight: 700; font-size: clamp(0.85rem, 1.3vw, 1rem); cursor: none; transition: all 0.3s ease; }
+        .booking-btn { width: 100%; background: var(--wine); color: white; border: none; border-radius: 12px; padding: 1rem; font-family: 'Vazirmatn', sans-serif; font-weight: 700; font-size: clamp(0.85rem, 1.3vw, 1rem); cursor: none; transition: all 0.3s ease; box-shadow: 3px 3px 0 var(--wine-dark); }
+        .booking-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--wine-dark); }
+        .booking-btn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--wine-dark); }
         .booking-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px var(--wine-glow); }
         .booking-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
         .booking-note { font-size: clamp(0.55rem, 0.9vw, 0.65rem); color: var(--text-dimmer); text-align: center; margin-top: 0.75rem; }
@@ -426,7 +430,7 @@
         .modal-gold-bar { height: 3px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
         .modal-header { text-align: center; padding: 2rem 2rem 0; }
         .modal-crown { width: 60px; height: 60px; margin: 0 auto 1rem; background: linear-gradient(135deg, var(--gold), #a8862c); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(201,168,76,0.3), 0 0 60px rgba(201,168,76,0.1); }
-        .modal-title { font-family: 'Lalezar', cursive; font-size: 1.5rem; color: var(--gold); margin-bottom: 0.3rem; }
+        .modal-title { font-family: 'Lalezar', cursive; font-size: 1.5rem; color: var(--gold); margin-bottom: 0.3rem; text-shadow: 2px 2px 0 var(--wine-dark); }
         .modal-subtitle { color: var(--text-dim); font-size: 0.8rem; }
         .modal-divider { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 1.2rem auto; }
         .modal-details { padding: 0 2rem; }
