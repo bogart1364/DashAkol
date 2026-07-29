@@ -7,63 +7,37 @@ function getClient() {
     });
 }
 
-async function sendTelegram(token, chatId, text, replyMarkup) {
-    const body = { chat_id: chatId, text };
-    if (replyMarkup) body.reply_markup = replyMarkup;
+async function sendTelegram(token, chatId, text) {
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    });
-    return res.json();
-}
-
-async function answerCallback(token, callbackQueryId, text) {
-    await fetch(`https://api.telegram.org/bot${token}/answerCallbackQuery`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ callback_query_id: callbackQueryId, text, show_alert: true })
-    });
-}
-
-async function editMessage(token, chatId, messageId, text, replyMarkup) {
-    const body = { chat_id: chatId, message_id: messageId, text };
-    if (replyMarkup) body.reply_markup = replyMarkup;
-    const res = await fetch(`https://api.telegram.org/bot${token}/editMessageText`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify({ chat_id: chatId, text })
     });
     return res.json();
 }
 
 module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     if (req.method === 'OPTIONS') return res.status(200).end();
-    if (req.method !== 'POST' && req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
     const token = process.env.TELEGRAM_BOT_TOKEN;
 
-    // Debug GET — check telegram_users table
+    // Debug GET
     if (req.method === 'GET') {
         const db = getClient();
         try {
-            await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (
-                chat_id TEXT PRIMARY KEY,
-                username TEXT,
-                first_name TEXT,
-                created_at TEXT DEFAULT (datetime('now'))
-            )`);
+            await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (chat_id TEXT PRIMARY KEY, username TEXT, first_name TEXT, created_at TEXT DEFAULT (datetime('now')))`);
             const users = await db.execute('SELECT * FROM telegram_users');
-            return res.status(200).json({ users: users.rows });
+            const bookings = await db.execute('SELECT id, date_key, time, name, phone, service, stylist, status, telegram_username, telegram_chat_id FROM bookings ORDER BY id DESC LIMIT 10');
+            return res.status(200).json({ users: users.rows, bookings: bookings.rows });
         } catch (e) {
             return res.status(500).json({ error: e.message });
         }
     }
 
-    if (!token) return res.status(500).json({ error: 'No bot token' });
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
     let body = req.body;
     if (typeof body === 'string') { try { body = JSON.parse(body); } catch { return res.status(400).json({ error: 'Invalid JSON' }); } }
@@ -73,61 +47,25 @@ module.exports = async (req, res) => {
         const msg = body.message;
         const chatId = msg.chat.id;
         const text = msg.text || '';
-        const username = msg.from.username || '';
+        const username = (msg.from.username || '').replace(/^@/, '');
         const firstName = msg.from.first_name || '';
+        const personalId = String(msg.from.id);
 
-        const userPersonalId = String(msg.from.id); // always personal, not group
-
-        if (text === '/start') {
-            const db = getClient();
-            try {
-                await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (
-                    chat_id TEXT PRIMARY KEY,
-                    username TEXT,
-                    first_name TEXT,
-                    created_at TEXT DEFAULT (datetime('now'))
-                )`);
-                await db.execute({
-                    sql: 'INSERT OR REPLACE INTO telegram_users (chat_id, username, first_name) VALUES (?, ?, ?)',
-                    args: [userPersonalId, username, firstName]
-                });
-                console.log('[START] Saved user:', userPersonalId, username, firstName);
-            } catch (e) {
-                console.error('[START] DB error:', e.message);
-            }
-
-            // Check if chat is private (personal) or group
-            const isPrivate = chatId > 0;
-            const replyChatId = isPrivate ? chatId : userPersonalId;
-            
-            await sendTelegram(token, replyChatId, `سلام ${firstName}! 👋
-
-به بات داش آکل خوش اومدی.
-
-وقتی نوبتت رو رزرو کنی، اینجا بهت خبر میدیم که نوبتت تایید شده یا نه.
-
-فقط کافیه تو فرم رزرو، آیدی تلگرامت رو وارد کنی.`);
-            return res.status(200).json({ ok: true });
+        const db = getClient();
+        try {
+            await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (chat_id TEXT PRIMARY KEY, username TEXT, first_name TEXT, created_at TEXT DEFAULT (datetime('now')))`);
+            await db.execute({
+                sql: 'INSERT OR REPLACE INTO telegram_users (chat_id, username, first_name) VALUES (?, ?, ?)',
+                args: [personalId, username, firstName]
+            });
+        } catch (e) {
+            console.error('[/start] DB error:', e.message);
         }
 
-        // Store chat_id for any user who messages the bot (use personal ID, not group)
-        if (username) {
-            const db = getClient();
-            try {
-                await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (
-                    chat_id TEXT PRIMARY KEY,
-                    username TEXT,
-                    first_name TEXT,
-                    created_at TEXT DEFAULT (datetime('now'))
-                )`);
-                await db.execute({
-                    sql: 'INSERT OR REPLACE INTO telegram_users (chat_id, username, first_name) VALUES (?, ?, ?)',
-                    args: [userPersonalId, username, firstName]
-                });
-                console.log('[MSG] Saved user:', userPersonalId, username);
-            } catch (e) {
-                console.error('[MSG] DB error:', e.message);
-            }
+        if (text === '/start') {
+            const isPrivate = chatId > 0;
+            const replyTo = isPrivate ? chatId : personalId;
+            await sendTelegram(token, replyTo, `سلام ${firstName}! 👋\n\nبه بات داش آکل خوش اومدی.\n\nوقتی نوبتت رو رزرو کنی، اینجا بهت خبر میدیم.\nفقط کافیه تو فرم رزرو، آیدی تلگرامت رو وارد کنی.`);
         }
 
         return res.status(200).json({ ok: true });
@@ -137,16 +75,16 @@ module.exports = async (req, res) => {
     if (body.callback_query) {
         const cb = body.callback_query;
         const data = cb.data || '';
-        const chatId = cb.message.chat.id;
+        const adminChatId = cb.message.chat.id;
         const messageId = cb.message.message_id;
         const adminName = cb.from.first_name || 'ادمین';
 
-        const db = getClient();
-
-        // Parse callback data: confirm_123 or reject_123
         const match = data.match(/^(confirm|reject)_(\d+)$/);
         if (!match) {
-            await answerCallback(token, cb.query_id, 'دکمه نامعتبر!');
+            await fetch(`https://api.telegram.org/bot${token}/answerCallbackQuery`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ callback_query_id: cb.query_id, text: 'دکمه نامعتبر!' })
+            });
             return res.status(200).json({ ok: true });
         }
 
@@ -156,79 +94,83 @@ module.exports = async (req, res) => {
         const statusEmoji = action === 'confirm' ? '✅' : '❌';
         const statusText = action === 'confirm' ? 'تایید شد' : 'رد شد';
 
-        // Update booking status in DB
+        const db = getClient();
+        const serviceNames = { hair: 'اصلاح مو', beard: 'فرم دهی ریش', classic: 'اصلاح کلاسیک', texturize: 'پیتاژ', full: 'پکیج مرد کامل', groom: 'پکیج داماد' };
+
+        // Update status
         try {
             await db.execute({ sql: 'UPDATE bookings SET status = ? WHERE id = ?', args: [newStatus, bookingId] });
-        } catch {}
+        } catch (e) { console.error('[CB] Update error:', e.message); }
 
-        // Get booking details
+        // Get booking
         let booking = null;
         try {
             const result = await db.execute({ sql: 'SELECT * FROM bookings WHERE id = ?', args: [bookingId] });
             if (result.rows.length > 0) booking = result.rows[0];
-        } catch {}
+        } catch (e) { console.error('[CB] Select error:', e.message); }
 
-        // Edit the original message to show status
-        const newText = cb.message.text + `\n\n${statusEmoji} ${statusText} توسط ${adminName}`;
-        await editMessage(token, chatId, messageId, newText);
+        console.log('[CB] Booking found:', JSON.stringify(booking));
 
-        // Answer the callback
-        await answerCallback(token, cb.query_id, `نوبت ${statusText}`);
+        // Edit original message
+        try {
+            const newText = cb.message.text + `\n\n${statusEmoji} ${statusText} توسط ${adminName}`;
+            await fetch(`https://api.telegram.org/bot${token}/editMessageText`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: adminChatId, message_id: messageId, text: newText })
+            });
+        } catch (e) { console.error('[CB] Edit error:', e.message); }
 
-        // Send DM to user if they have a chat_id stored
-        if (booking && booking.telegram_chat_id) {
-            const userChatId = booking.telegram_chat_id;
-            const serviceNames = { hair: 'اصلاح مو', beard: 'فرم دهی ریش', classic: 'اصلاح کلاسیک', texturize: 'پیتاژ', full: 'پکیج مرد کامل', groom: 'پکیج داماد' };
-            const userMsg = `${statusEmoji} نوبت شما ${statusText}!
+        // Answer callback
+        try {
+            await fetch(`https://api.telegram.org/bot${token}/answerCallbackQuery`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ callback_query_id: cb.query_id, text: `نوبت ${statusText}` })
+            });
+        } catch (e) { console.error('[CB] Answer error:', e.message); }
 
-📅 تاریخ: ${booking.date_key}
-🕐 ساعت: ${booking.time}
-✂️ سرویس: ${serviceNames[booking.service] || booking.service}
+        // Build DM text
+        if (booking) {
+            const dmText = `${statusEmoji} نوبت شما ${statusText}!\n\n📅 تاریخ: ${booking.date_key}\n🕐 ساعت: ${booking.time}\n✂️ سرویس: ${serviceNames[booking.service] || booking.service}\n\n${action === 'confirm' ? 'منتظرتون هستیم! 🤝' : 'متأسفیم، نوبت شما رد شد.'}`;
 
-${action === 'confirm'
-    ? 'منتظرتون هستیم! 🤝'
-    : 'متأسفیم، نوبت شما رد شد. لطفاً وقت دیگه‌ای رزرو کنید.'}`;
+            // Find user's personal chat_id
+            let userChatId = null;
 
-            const dmResult = await sendTelegram(token, userChatId, userMsg);
-            console.log('[DM] Sent to chat_id:', userChatId, 'result:', JSON.stringify(dmResult));
-        } else if (booking && booking.telegram_username) {
-            // Try to find chat_id from telegram_users table (case-insensitive, prefer personal/private chat)
-            try {
-                const uname = booking.telegram_username.toLowerCase();
-                console.log('[DM] Looking up username:', uname);
-                const result = await db.execute({ sql: 'SELECT chat_id, username FROM telegram_users', args: [] });
-                console.log('[DM] All telegram_users:', JSON.stringify(result.rows));
-                
-                // Prefer positive chat_id (personal chat) over negative (group)
-                const matches = result.rows.filter(r => (r.username || '').toLowerCase() === uname);
-                const found = matches.find(r => Number(r.chat_id) > 0) || matches[0];
-                if (found) {
-                    const userChatId = found.chat_id;
-                    console.log('[DM] Found user:', userChatId, found.username, Number(userChatId) > 0 ? '(personal)' : '(group!)');
-                    const serviceNames = { hair: 'اصلاح مو', beard: 'فرم دهی ریش', classic: 'اصلاح کلاسیک', texturize: 'پیتاژ', full: 'پکیج مرد کامل', groom: 'پکیج داماد' };
-                    const userMsg = `${statusEmoji} نوبت شما ${statusText}!
-
-📅 تاریخ: ${booking.date_key}
-🕐 ساعت: ${booking.time}
-✂️ سرویس: ${serviceNames[booking.service] || booking.service}
-
-${action === 'confirm'
-    ? 'منتظرتون هستیم! 🤝'
-    : 'متأسفیم، نوبت شما رد شد. لطفاً وقت دیگه‌ای رزرو کنید.'}`;
-
-                    const dmResult = await sendTelegram(token, userChatId, userMsg);
-                    console.log('[DM] Sent result:', JSON.stringify(dmResult));
-
-                    // Store chat_id for future use
-                    await db.execute({ sql: 'UPDATE bookings SET telegram_chat_id = ? WHERE id = ?', args: [userChatId, bookingId] });
-                } else {
-                    console.log('[DM] User not found for username:', uname);
-                }
-            } catch (e) {
-                console.error('[DM] Error:', e.message);
+            // Method1: direct from booking
+            if (booking.telegram_chat_id && Number(booking.telegram_chat_id) > 0) {
+                userChatId = booking.telegram_chat_id;
+                console.log('[DM] Using chat_id from booking:', userChatId);
             }
-        } else {
-            console.log('[DM] No chat_id or username for booking:', bookingId);
+
+            // Method2: lookup by username in telegram_users
+            if (!userChatId && booking.telegram_username) {
+                try {
+                    const uname = booking.telegram_username.toLowerCase();
+                    const allUsers = await db.execute('SELECT chat_id, username FROM telegram_users');
+                    console.log('[DM] All users:', JSON.stringify(allUsers.rows));
+                    const matches = allUsers.rows.filter(r => (r.username || '').toLowerCase() === uname);
+                    const personal = matches.find(r => Number(r.chat_id) > 0);
+                    if (personal) {
+                        userChatId = personal.chat_id;
+                        console.log('[DM] Found personal chat_id:', userChatId);
+                        // Save for next time
+                        await db.execute({ sql: 'UPDATE bookings SET telegram_chat_id = ? WHERE id = ?', args: [userChatId, bookingId] });
+                    } else if (matches.length > 0) {
+                        console.log('[DM] Only group chat_ids found:', JSON.stringify(matches));
+                    } else {
+                        console.log('[DM] No user found for username:', uname);
+                    }
+                } catch (e) { console.error('[DM] Lookup error:', e.message); }
+            }
+
+            // Send DM
+            if (userChatId) {
+                try {
+                    const dmResult = await sendTelegram(token, userChatId, dmText);
+                    console.log('[DM] Sent:', JSON.stringify(dmResult));
+                } catch (e) { console.error('[DM] Send error:', e.message); }
+            } else {
+                console.log('[DM] Could not find personal chat_id for user:', booking.telegram_username);
+            }
         }
 
         return res.status(200).json({ ok: true });
