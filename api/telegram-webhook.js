@@ -76,6 +76,8 @@ module.exports = async (req, res) => {
         const username = msg.from.username || '';
         const firstName = msg.from.first_name || '';
 
+        const userPersonalId = String(msg.from.id); // always personal, not group
+
         if (text === '/start') {
             const db = getClient();
             try {
@@ -87,14 +89,18 @@ module.exports = async (req, res) => {
                 )`);
                 await db.execute({
                     sql: 'INSERT OR REPLACE INTO telegram_users (chat_id, username, first_name) VALUES (?, ?, ?)',
-                    args: [String(chatId), username, firstName]
+                    args: [userPersonalId, username, firstName]
                 });
-                console.log('[START] Saved user:', chatId, username, firstName);
+                console.log('[START] Saved user:', userPersonalId, username, firstName);
             } catch (e) {
                 console.error('[START] DB error:', e.message);
             }
 
-            await sendTelegram(token, chatId, `سلام ${firstName}! 👋
+            // Check if chat is private (personal) or group
+            const isPrivate = chatId > 0;
+            const replyChatId = isPrivate ? chatId : userPersonalId;
+            
+            await sendTelegram(token, replyChatId, `سلام ${firstName}! 👋
 
 به بات داش آکل خوش اومدی.
 
@@ -104,7 +110,7 @@ module.exports = async (req, res) => {
             return res.status(200).json({ ok: true });
         }
 
-        // Store chat_id for any user who messages the bot
+        // Store chat_id for any user who messages the bot (use personal ID, not group)
         if (username) {
             const db = getClient();
             try {
@@ -116,9 +122,9 @@ module.exports = async (req, res) => {
                 )`);
                 await db.execute({
                     sql: 'INSERT OR REPLACE INTO telegram_users (chat_id, username, first_name) VALUES (?, ?, ?)',
-                    args: [String(chatId), username, firstName]
+                    args: [userPersonalId, username, firstName]
                 });
-                console.log('[MSG] Saved user:', chatId, username);
+                console.log('[MSG] Saved user:', userPersonalId, username);
             } catch (e) {
                 console.error('[MSG] DB error:', e.message);
             }
