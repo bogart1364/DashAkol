@@ -1,10 +1,30 @@
 const { createClient } = require('@libsql/client');
 
+const ALLOWED_ORIGIN = 'https://dash-akol.vercel.app';
+const RATE_LIMIT = new Map();
+
 function getClient() {
     return createClient({
         url: process.env.TURSO_DATABASE_URL,
         authToken: process.env.TURSO_AUTH_TOKEN,
     });
+}
+
+function setCors(res) {
+    res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
+
+function isRateLimited(key, limit = 10, windowMs = 60000) {
+    const now = Date.now();
+    const entry = RATE_LIMIT.get(key);
+    if (!entry || now - entry.start > windowMs) {
+        RATE_LIMIT.set(key, { start: now, count: 1 });
+        return false;
+    }
+    entry.count++;
+    return entry.count > limit;
 }
 
 async function sendTelegram(token, chatId, text, replyMarkup) {
@@ -19,28 +39,40 @@ async function sendTelegram(token, chatId, text, replyMarkup) {
 }
 
 module.exports = async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    setCors(res);
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     const token = process.env.TELEGRAM_BOT_TOKEN;
 
-    // Debug GET
+    // Debug GET — requires admin key
     if (req.method === 'GET') {
+        const adminKey = req.headers['x-admin-key'] || req.query?.key;
+        if (!adminKey || adminKey !== process.env.ADMIN_KEY) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+        if (isRateLimited('debug_' + adminKey, 10)) {
+            return res.status(429).json({ error: 'Rate limited' });
+        }
         const db = getClient();
         try {
             await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (chat_id TEXT PRIMARY KEY, username TEXT, first_name TEXT, created_at TEXT DEFAULT (datetime('now')))`);
             await db.execute("DELETE FROM telegram_users WHERE chat_id = '123456'");
             const users = await db.execute('SELECT * FROM telegram_users ORDER BY created_at DESC');
-            const bookings = await db.execute('SELECT id, date_key, time, name, phone, service, stylist, status, telegram_username, telegram_chat_id FROM bookings ORDER BY id DESC LIMIT 10');
+            const bookings = await db.execute('SELECT id, date_key, time, name, phone, service, stylist, status, telegram_username FROM bookings ORDER BY id DESC LIMIT 10');
             return res.status(200).json({ users: users.rows, bookings: bookings.rows });
         } catch (e) {
-            return res.status(500).json({ error: e.message });
+            return res.status(500).json({ error: 'DB error' });
         }
     }
 
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+    // Verify Telegram webhook secret
+    const secretToken = req.headers['x-telegram-bot-api-secret-token'];
+    const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+    if (expectedSecret && secretToken !== expectedSecret) {
+        return res.status(403).json({ error: 'Forbidden' });
+    }
 
     let body = req.body;
     if (typeof body === 'string') { try { body = JSON.parse(body); } catch { return res.status(400).json({ error: 'Invalid JSON' }); } }
@@ -55,16 +87,15 @@ module.exports = async (req, res) => {
         const chatId = msg.chat.id;
         const text = msg.text || '';
         const username = (msg.from.username || '').replace(/^@/, '');
-        const firstName = msg.from.first_name || '';
+        const firstName = (msg.from.first_name || '').slice(0, 50);
         const personalId = String(msg.from.id);
 
         try {
             await db.execute({
                 sql: 'INSERT OR REPLACE INTO telegram_users (chat_id, username, first_name) VALUES (?, ?, ?)',
-                args: [personalId, username, firstName]
+                args: [personalId, username.slice(0, 30), firstName]
             });
 
-            // Link to pending bookings
             if (username) {
                 const uname = username.toLowerCase();
                 const pending = await db.execute({ sql: "SELECT id FROM bookings WHERE LOWER(telegram_username) = ? AND (telegram_chat_id IS NULL OR telegram_chat_id = '')", args: [uname] });
@@ -97,7 +128,7 @@ module.exports = async (req, res) => {
         const data = cb.data || '';
         const adminChatId = cb.message.chat.id;
         const messageId = cb.message.message_id;
-        const adminName = cb.from.first_name || 'ادمین';
+        const adminName = (cb.from.first_name || 'ادمین').slice(0, 50);
 
         const match = data.match(/^(confirm|reject)_(\d+)$/);
         if (!match) {
@@ -117,19 +148,16 @@ module.exports = async (req, res) => {
         const statusText = action === 'confirm' ? 'تایید شد' : 'رد شد';
         const serviceNames = { hair: 'اصلاح مو', beard: 'فرم دهی ریش', classic: 'اصلاح کلاسیک', texturize: 'پیتاژ', full: 'پکیج مرد کامل', groom: 'پکیج داماد' };
 
-        // 1. Update status
         try {
             await db.execute({ sql: 'UPDATE bookings SET status = ? WHERE id = ?', args: [newStatus, bookingId] });
         } catch (e) { console.error('[CB] Update error:', e.message); }
 
-        // 2. Get booking
         let booking = null;
         try {
             const result = await db.execute({ sql: 'SELECT * FROM bookings WHERE id = ?', args: [bookingId] });
             if (result.rows.length > 0) booking = result.rows[0];
         } catch (e) { console.error('[CB] Select error:', e.message); }
 
-        // 3. Edit original message
         try {
             const newText = cb.message.text + `\n\n${statusEmoji} ${statusText} توسط ${adminName}`;
             await fetch(`https://api.telegram.org/bot${token}/editMessageText`, {
@@ -138,7 +166,6 @@ module.exports = async (req, res) => {
             });
         } catch (e) { console.error('[CB] Edit error:', e.message); }
 
-        // 4. Answer callback
         try {
             await fetch(`https://api.telegram.org/bot${token}/answerCallbackQuery`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -146,18 +173,15 @@ module.exports = async (req, res) => {
             });
         } catch (e) { console.error('[CB] Answer error:', e.message); }
 
-        // 5. Send DM
         if (booking) {
             const dmText = `${statusEmoji} نوبت شما ${statusText}!\n\n📅 تاریخ: ${booking.date_key}\n🕐 ساعت: ${booking.time}\n✂️ سرویس: ${serviceNames[booking.service] || booking.service}\n\n${action === 'confirm' ? 'منتظرتون هستیم!' : 'متأسفیم، نوبت شما رد شد.'}`;
 
             let userChatId = null;
 
-            // Try saved chat_id first
             if (booking.telegram_chat_id && Number(booking.telegram_chat_id) > 0 && booking.telegram_chat_id !== '123456') {
                 userChatId = booking.telegram_chat_id;
             }
 
-            // Lookup by username
             if (!userChatId && booking.telegram_username) {
                 try {
                     const uname = booking.telegram_username.toLowerCase();
@@ -174,7 +198,6 @@ module.exports = async (req, res) => {
                 } catch (e) { console.error('[DM] Username lookup error:', e.message); }
             }
 
-            // Fallback: name match
             if (!userChatId && booking.name) {
                 try {
                     const bname = booking.name.trim().toLowerCase();
@@ -195,8 +218,6 @@ module.exports = async (req, res) => {
                 try {
                     await sendTelegram(token, userChatId, dmText);
                 } catch (e) { console.error('[DM] Send error:', e.message); }
-            } else {
-                console.log('[DM] No chat_id for user:', booking.telegram_username);
             }
         }
 

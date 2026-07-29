@@ -1,5 +1,12 @@
+const ALLOWED_ORIGIN = 'https://dash-akol.vercel.app';
+
+function sanitize(str, maxLen = 100) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[<>&"']/g, '').trim().slice(0, maxLen);
+}
+
 module.exports = async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     if (req.method === 'OPTIONS') return res.status(200).end();
@@ -10,25 +17,33 @@ module.exports = async (req, res) => {
 
     const { name, phone, service, stylist, date, time, joke, telegram_username, booking_id } = body || {};
     if (!name || !phone || !service || !date || !time) {
-        return res.status(400).json({ error: 'Missing required fields', got: body });
+        return res.status(400).json({ error: 'Missing required fields' });
     }
 
     const token = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
     if (!token || !chatId) {
-        return res.status(500).json({ error: 'Telegram not configured', hasToken: !!token, hasChatId: !!chatId });
+        return res.status(500).json({ error: 'Telegram not configured' });
     }
 
-    const tgUser = telegram_username ? ` | @${telegram_username}` : '';
-    const text = `💈 نوبت جدید — داش آکل
+    const cleanName = sanitize(name, 50);
+    const cleanPhone = sanitize(phone, 15);
+    const cleanService = sanitize(service, 30);
+    const cleanStylist = sanitize(stylist, 20);
+    const cleanDate = sanitize(date, 40);
+    const cleanTime = sanitize(time, 10);
+    const cleanJoke = joke ? sanitize(joke, 60) : '';
+    const tgUser = telegram_username ? ` | @${sanitize(telegram_username.replace(/^@/, ''), 30)}` : '';
 
-👤 نام: ${name}${tgUser}
-📱 تلفن: ${phone}
-✂️ سرویس: ${service}
-💇 استایلیست: ${stylist}
-📅 تاریخ: ${date}
-🕐 ساعت: ${time}
-${joke ? `\n🎭 ${joke}` : ''}`;
+    const text = ` Barber نوبت جدید — داش آکل
+
+👤 نام: ${cleanName}${tgUser}
+📱 تلفن: ${cleanPhone}
+✂️ سرویس: ${cleanService}
+💇 استایلیست: ${cleanStylist}
+📅 تاریخ: ${cleanDate}
+🕐 ساعت: ${cleanTime}
+${cleanJoke ? `\n🎭 ${cleanJoke}` : ''}`;
 
     const inlineKeyboard = {
         inline_keyboard: [
@@ -46,9 +61,9 @@ ${joke ? `\n🎭 ${joke}` : ''}`;
             body: JSON.stringify({ chat_id: chatId, text, reply_markup: inlineKeyboard })
         });
         const data = await tgRes.json();
-        if (!data.ok) return res.status(502).json({ error: 'Telegram API error', detail: data.description });
+        if (!data.ok) return res.status(502).json({ error: 'Telegram API error' });
         return res.status(200).json({ success: true, message_id: data.result.message_id });
     } catch (err) {
-        return res.status(500).json({ error: 'Failed to send', detail: err.message });
+        return res.status(500).json({ error: 'Failed to send' });
     }
 };
