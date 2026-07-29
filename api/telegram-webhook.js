@@ -71,7 +71,10 @@ module.exports = async (req, res) => {
                     sql: 'INSERT OR REPLACE INTO telegram_users (chat_id, username, first_name) VALUES (?, ?, ?)',
                     args: [String(chatId), username, firstName]
                 });
-            } catch {}
+                console.log('[START] Saved user:', chatId, username, firstName);
+            } catch (e) {
+                console.error('[START] DB error:', e.message);
+            }
 
             await sendTelegram(token, chatId, `سلام ${firstName}! 👋
 
@@ -97,7 +100,10 @@ module.exports = async (req, res) => {
                     sql: 'INSERT OR REPLACE INTO telegram_users (chat_id, username, first_name) VALUES (?, ?, ?)',
                     args: [String(chatId), username, firstName]
                 });
-            } catch {}
+                console.log('[MSG] Saved user:', chatId, username);
+            } catch (e) {
+                console.error('[MSG] DB error:', e.message);
+            }
         }
 
         return res.status(200).json({ ok: true });
@@ -159,13 +165,20 @@ ${action === 'confirm'
     ? 'منتظرتون هستیم! 🤝'
     : 'متأسفیم، نوبت شما رد شد. لطفاً وقت دیگه‌ای رزرو کنید.'}`;
 
-            await sendTelegram(token, userChatId, userMsg);
+            const dmResult = await sendTelegram(token, userChatId, userMsg);
+            console.log('[DM] Sent to chat_id:', userChatId, 'result:', JSON.stringify(dmResult));
         } else if (booking && booking.telegram_username) {
-            // Try to find chat_id from telegram_users table
+            // Try to find chat_id from telegram_users table (case-insensitive)
             try {
-                const result = await db.execute({ sql: 'SELECT chat_id FROM telegram_users WHERE username = ?', args: [booking.telegram_username] });
-                if (result.rows.length > 0) {
-                    const userChatId = result.rows[0].chat_id;
+                const uname = booking.telegram_username.toLowerCase();
+                console.log('[DM] Looking up username:', uname);
+                const result = await db.execute({ sql: 'SELECT chat_id, username FROM telegram_users', args: [] });
+                console.log('[DM] All telegram_users:', JSON.stringify(result.rows));
+                
+                const found = result.rows.find(r => (r.username || '').toLowerCase() === uname);
+                if (found) {
+                    const userChatId = found.chat_id;
+                    console.log('[DM] Found user:', userChatId, found.username);
                     const serviceNames = { hair: 'اصلاح مو', beard: 'فرم دهی ریش', classic: 'اصلاح کلاسیک', texturize: 'پیتاژ', full: 'پکیج مرد کامل', groom: 'پکیج داماد' };
                     const userMsg = `${statusEmoji} نوبت شما ${statusText}!
 
@@ -177,12 +190,19 @@ ${action === 'confirm'
     ? 'منتظرتون هستیم! 🤝'
     : 'متأسفیم، نوبت شما رد شد. لطفاً وقت دیگه‌ای رزرو کنید.'}`;
 
-                    await sendTelegram(token, userChatId, userMsg);
+                    const dmResult = await sendTelegram(token, userChatId, userMsg);
+                    console.log('[DM] Sent result:', JSON.stringify(dmResult));
 
                     // Store chat_id for future use
                     await db.execute({ sql: 'UPDATE bookings SET telegram_chat_id = ? WHERE id = ?', args: [userChatId, bookingId] });
+                } else {
+                    console.log('[DM] User not found for username:', uname);
                 }
-            } catch {}
+            } catch (e) {
+                console.error('[DM] Error:', e.message);
+            }
+        } else {
+            console.log('[DM] No chat_id or username for booking:', bookingId);
         }
 
         return res.status(200).json({ ok: true });
