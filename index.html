@@ -197,6 +197,19 @@
         .service-desc { color: var(--text-dim); line-height: 1.8; flex: 1; font-size: clamp(0.8rem, 1.2vw, 0.9rem); }
         .service-price { font-family: 'Changa', cursive; font-size: clamp(1rem, 1.8vw, 1.3rem); color: var(--gold); font-weight: 800; margin-top: auto; }
 
+        /* ==================== BANNER CAROUSEL ==================== */
+        #banner { background: var(--bg); }
+        .banner-track { display: flex; width: 400%; animation: bannerSlide 16s linear infinite; }
+        .banner-slide { width: 25%; min-height: 50vh; display: flex; align-items: center; justify-content: center; position: relative; }
+        .banner-slide::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(114,47,55,0.1), rgba(26,26,62,0.1)); }
+        .banner-placeholder { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+        .banner-placeholder svg { width: clamp(150px, 30vw, 280px); height: clamp(150px, 30vw, 280px); filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5)); }
+        .banner-placeholder span { font-family: 'Changa', cursive; font-size: clamp(1rem, 2vw, 1.5rem); color: var(--gold); font-weight: 700; letter-spacing: 0.05em; }
+        .banner-dots { position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.6rem; z-index: 10; }
+        .banner-dot { width: 10px; height: 10px; background: var(--text-dimmer); cursor: pointer; transition: all 0.3s; }
+        .banner-dot.active { background: var(--gold); width: 30px; }
+        @keyframes bannerSlide { 0%, 20% { transform: translateX(0); } 25%, 45% { transform: translateX(-25%); } 50%, 70% { transform: translateX(-50%); } 75%, 95% { transform: translateX(-75%); } 100% { transform: translateX(0); } }
+
         /* ==================== STYLISTS ==================== */
         .stylists-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; max-width: 1200px; margin: 0 auto; }
         .stylist-card { background: var(--surface); border: 1px solid rgba(255,255,255,0.05); border-radius: 0; padding: 2rem 1.5rem; text-align: center; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; }
@@ -764,6 +777,42 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- ==================== BANNER CAROUSEL ==================== -->
+    <section id="banner" style="min-height: 50vh; padding: 0; overflow: hidden; position: relative;">
+        <div class="banner-track">
+            <div class="banner-slide active">
+                <div class="banner-placeholder">
+                    <svg viewBox="0 0 120 120"><circle cx="60" cy="45" r="22" fill="#d4a574"/><ellipse cx="60" cy="95" rx="35" ry="25" fill="#1a1a2e"/><path d="M38 38 Q45 20 60 25 Q75 20 82 38" fill="#2a1a0a"/><circle cx="52" cy="42" r="2" fill="#1a0808"/><circle cx="68" cy="42" r="2" fill="#1a0808"/><path d="M55 52 Q60 56 65 52" fill="none" stroke="#1a0808" stroke-width="1.5"/></svg>
+                    <span>مدل ۱</span>
+                </div>
+            </div>
+            <div class="banner-slide">
+                <div class="banner-placeholder">
+                    <svg viewBox="0 0 120 120"><circle cx="60" cy="45" r="22" fill="#c4956a"/><ellipse cx="60" cy="95" rx="35" ry="25" fill="#2e1a1a"/><path d="M35 35 Q50 15 60 22 Q70 15 85 35" fill="#1a0f05"/><circle cx="52" cy="42" r="2" fill="#1a0808"/><circle cx="68" cy="42" r="2" fill="#1a0808"/><path d="M55 52 Q60 55 65 52" fill="none" stroke="#1a0808" stroke-width="1.5"/></svg>
+                    <span>مدل ۲</span>
+                </div>
+            </div>
+            <div class="banner-slide">
+                <div class="banner-placeholder">
+                    <svg viewBox="0 0 120 120"><circle cx="60" cy="45" r="22" fill="#b8956a"/><ellipse cx="60" cy="95" rx="35" ry="25" fill="#1a2e1a"/><path d="M40 40 Q50 22 60 28 Q70 22 80 40" fill="#0a0a05"/><circle cx="52" cy="42" r="2" fill="#1a0808"/><circle cx="68" cy="42" r="2" fill="#1a0808"/><path d="M55 52 Q60 56 65 52" fill="none" stroke="#1a0808" stroke-width="1.5"/></svg>
+                    <span>مدل ۳</span>
+                </div>
+            </div>
+            <div class="banner-slide">
+                <div class="banner-placeholder">
+                    <svg viewBox="0 0 120 120"><circle cx="60" cy="45" r="22" fill="#d4a574"/><ellipse cx="60" cy="95" rx="35" ry="25" fill="#2e2e1a"/><path d="M36 36 Q48 18 60 24 Q72 18 84 36" fill="#1a1a0a"/><circle cx="52" cy="42" r="2" fill="#1a0808"/><circle cx="68" cy="42" r="2" fill="#1a0808"/><path d="M55 52 Q60 55 65 52" fill="none" stroke="#1a0808" stroke-width="1.5"/></svg>
+                    <span>مدل ۴</span>
+                </div>
+            </div>
+        </div>
+        <div class="banner-dots">
+            <span class="banner-dot active" data-index="0"></span>
+            <span class="banner-dot" data-index="1"></span>
+            <span class="banner-dot" data-index="2"></span>
+            <span class="banner-dot" data-index="3"></span>
         </div>
     </section>
 
@@ -2124,6 +2173,30 @@
         });
 
         renderCalendar();
+
+        // Banner carousel dots
+        const bannerDots = document.querySelectorAll('.banner-dot');
+        const bannerTrack = document.querySelector('.banner-track');
+        let bannerIdx = 0;
+        function updateBannerDots() {
+            bannerDots.forEach((d, i) => d.classList.toggle('active', i === bannerIdx));
+        }
+        bannerDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                bannerIdx = parseInt(dot.dataset.index);
+                bannerTrack.style.animation = 'none';
+                bannerTrack.offsetHeight;
+                bannerTrack.style.transform = `translateX(-${bannerIdx * 25}%)`;
+                bannerTrack.style.transition = 'transform 0.5s ease';
+                updateBannerDots();
+            });
+        });
+        setInterval(() => {
+            bannerIdx = (bannerIdx + 1) % 4;
+            if (bannerTrack.style.transition) bannerTrack.style.transition = 'none';
+            bannerTrack.style.transform = `translateX(-${bannerIdx * 25}%)`;
+            updateBannerDots();
+        }, 4000);
 
         let lastScrollY = 0;
         let scrollTimeout;
