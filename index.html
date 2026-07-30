@@ -80,7 +80,7 @@
 
         #preloader { position: fixed; inset: 0; z-index: 99999; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
         #preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .preloader-text { font-family: 'Changa', cursive; font-size: clamp(1.2rem, 4vw, 2.5rem); color: var(--wine); letter-spacing: 0.3em; font-weight: 800; text-shadow: 2px 2px 0 var(--navy); }
+        .preloader-text { font-family: 'Changa', cursive; font-size: clamp(1.2rem, 4vw, 2.5rem); color: var(--wine); letter-spacing: 0.3em; font-weight: 800; }
         .preloader-bar { width: 150px; height: 2px; background: var(--surface2); margin-top: 2rem; border-radius: 1px; overflow: hidden; }
         .preloader-bar-inner { width: 0%; height: 100%; background: linear-gradient(90deg, var(--wine), var(--navy-light)); transition: width 0.2s ease; }
 
@@ -102,7 +102,7 @@
         .hero-text { }
         .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.55rem, 1.2vw, 0.7rem); color: var(--gold); padding: 0.5rem 1.2rem; border-radius: 100px; background: var(--gold-dim); margin-bottom: 2rem; opacity: 0; animation: comicPop 0.8s ease 0.5s forwards; border: 1px solid rgba(201,168,76,0.2); }
         .hero-badge-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
-        .hero-title { font-family: 'Changa', cursive; font-size: clamp(3rem, 8vw, 7rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.02em; margin-bottom: 1.5rem; opacity: 0; animation: fadeInUp 1s ease 0.7s forwards; color: var(--wine); text-shadow: 3px 3px 0 var(--navy), 6px 6px 0 rgba(26,26,62,0.5), 0 0 30px rgba(114,47,55,0.4), 0 0 60px rgba(114,47,55,0.2); -webkit-text-stroke: 2px rgba(201,168,76,0.2); letter-spacing: 0.02em; }
+        .hero-title { font-family: 'Changa', cursive; font-size: clamp(3rem, 8vw, 7rem); font-weight: 800; line-height: 0.95; letter-spacing: 0.02em; margin-bottom: 1.5rem; opacity: 0; animation: fadeInUp 1s ease 0.7s forwards; color: var(--wine); text-shadow: 4px 4px 0 rgba(0,0,0,0.4); }
         .hero-title span { display: block; }
         @media (max-width: 600px) { .hero-title span { display: inline; } }
         .hero-title .accent { color: var(--wine); }
@@ -126,7 +126,7 @@
         /* ==================== SERVICES ==================== */
         .section-header { text-align: center; margin-bottom: clamp(2rem, 5vw, 4rem); }
         .section-badge { font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.55rem, 1vw, 0.65rem); color: var(--gold); }
-        .section-title { font-family: 'Changa', cursive; font-size: clamp(2rem, 5vw, 4rem); font-weight: 800; margin-top: 0.75rem; letter-spacing: -0.01em; color: var(--text); text-shadow: 2px 2px 0 var(--wine-dark), 4px 4px 0 rgba(114,47,55,0.3); }
+        .section-title { font-family: 'Changa', cursive; font-size: clamp(2rem, 5vw, 4rem); font-weight: 800; margin-top: 0.75rem; letter-spacing: 0.01em; color: var(--text); text-shadow: 2px 2px 0 rgba(0,0,0,0.3); }
         .section-desc { color: var(--text-dim); margin-top: 0.75rem; max-width: 550px; margin-left: auto; margin-right: auto; font-size: clamp(0.85rem, 1.5vw, 1rem); line-height: 1.8; }
 
         .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: clamp(1rem, 2vw, 1.5rem); }
@@ -193,7 +193,7 @@
         .icon-meme::after { content: ''; position: absolute; top: -4px; right: -4px; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; animation: memeDot 1.5s ease-in-out infinite; }
         @keyframes memeDot { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } }
         .service-number { font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.55rem, 1vw, 0.65rem); color: var(--wine-light); margin-bottom: 0.5rem; }
-        .service-title { font-family: 'Changa', cursive; font-size: clamp(1.2rem, 2vw, 1.5rem); font-weight: 700; margin-bottom: 0.75rem; text-shadow: 1px 1px 0 var(--wine-dark); }
+        .service-title { font-family: 'Changa', cursive; font-size: clamp(1.2rem, 2vw, 1.5rem); font-weight: 700; margin-bottom: 0.75rem; }
         .service-desc { color: var(--text-dim); line-height: 1.8; flex: 1; font-size: clamp(0.8rem, 1.2vw, 0.9rem); }
         .service-price { font-family: 'Changa', cursive; font-size: clamp(1rem, 1.8vw, 1.3rem); color: var(--gold); font-weight: 800; margin-top: auto; }
 
@@ -430,7 +430,7 @@
         .modal-gold-bar { height: 3px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
         .modal-header { text-align: center; padding: 2rem 2rem 0; }
         .modal-crown { width: 60px; height: 60px; margin: 0 auto 1rem; background: linear-gradient(135deg, var(--gold), #a8862c); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(201,168,76,0.3), 0 0 60px rgba(201,168,76,0.1); }
-        .modal-title { font-family: 'Changa', cursive; font-size: 1.5rem; color: var(--gold); margin-bottom: 0.3rem; text-shadow: 2px 2px 0 var(--wine-dark); font-weight: 800; }
+        .modal-title { font-family: 'Changa', cursive; font-size: 1.5rem; color: var(--gold); margin-bottom: 0.3rem; font-weight: 800; }
         .modal-subtitle { color: var(--text-dim); font-size: 0.8rem; }
         .modal-divider { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 1.2rem auto; }
         .modal-details { padding: 0 2rem; }
