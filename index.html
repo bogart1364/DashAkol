@@ -199,7 +199,7 @@
 
         /* ==================== BANNER CAROUSEL ==================== */
         #banner { background: var(--bg); }
-        .banner-track { display: flex; width: 400%; animation: bannerSlide 16s linear infinite; }
+        .banner-track { display: flex; width: 400%; transition: transform 0.5s ease; }
         .banner-slide { width: 25%; min-height: 50vh; display: flex; align-items: center; justify-content: center; position: relative; }
         .banner-slide::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(114,47,55,0.1), rgba(26,26,62,0.1)); }
         .banner-placeholder { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
@@ -2174,29 +2174,76 @@
 
         renderCalendar();
 
-        // Banner carousel dots
+        // Banner carousel with touch swipe
         const bannerDots = document.querySelectorAll('.banner-dot');
         const bannerTrack = document.querySelector('.banner-track');
+        const bannerSection = document.getElementById('banner');
         let bannerIdx = 0;
-        function updateBannerDots() {
-            bannerDots.forEach((d, i) => d.classList.toggle('active', i === bannerIdx));
-        }
-        bannerDots.forEach(dot => {
-            dot.addEventListener('click', () => {
-                bannerIdx = parseInt(dot.dataset.index);
-                bannerTrack.style.animation = 'none';
-                bannerTrack.offsetHeight;
-                bannerTrack.style.transform = `translateX(-${bannerIdx * 25}%)`;
-                bannerTrack.style.transition = 'transform 0.5s ease';
-                updateBannerDots();
-            });
-        });
-        setInterval(() => {
-            bannerIdx = (bannerIdx + 1) % 4;
-            if (bannerTrack.style.transition) bannerTrack.style.transition = 'none';
+        const bannerTotal = 4;
+        let bannerAnimating = false;
+
+        function goToSlide(idx) {
+            if (bannerAnimating) return;
+            bannerAnimating = true;
+            bannerIdx = ((idx % bannerTotal) + bannerTotal) % bannerTotal;
+            bannerTrack.style.transition = 'transform 0.5s ease';
             bannerTrack.style.transform = `translateX(-${bannerIdx * 25}%)`;
-            updateBannerDots();
-        }, 4000);
+            bannerDots.forEach((d, i) => d.classList.toggle('active', i === bannerIdx));
+            setTimeout(() => { bannerAnimating = false; }, 500);
+        }
+
+        bannerDots.forEach(dot => {
+            dot.addEventListener('click', () => goToSlide(parseInt(dot.dataset.index)));
+        });
+
+        // Auto slide
+        let bannerInterval = setInterval(() => goToSlide(bannerIdx + 1), 4000);
+        function resetBannerInterval() {
+            clearInterval(bannerInterval);
+            bannerInterval = setInterval(() => goToSlide(bannerIdx + 1), 4000);
+        }
+
+        // Touch swipe
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchMoved = false;
+        bannerSection.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            touchMoved = false;
+        }, { passive: true });
+
+        bannerSection.addEventListener('touchmove', (e) => {
+            touchMoved = true;
+        }, { passive: true });
+
+        bannerSection.addEventListener('touchend', (e) => {
+            if (!touchMoved) return;
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            const dy = e.changedTouches[0].clientY - touchStartY;
+            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
+                if (dx < 0) goToSlide(bannerIdx + 1);
+                else goToSlide(bannerIdx - 1);
+                resetBannerInterval();
+            }
+        });
+
+        // Mouse drag swipe
+        let mouseDown = false;
+        let mouseStartX = 0;
+        bannerSection.addEventListener('mousedown', (e) => { mouseDown = true; mouseStartX = e.clientX; });
+        bannerSection.addEventListener('mousemove', (e) => { if (mouseDown) e.preventDefault(); });
+        bannerSection.addEventListener('mouseup', (e) => {
+            if (!mouseDown) return;
+            mouseDown = false;
+            const dx = e.clientX - mouseStartX;
+            if (Math.abs(dx) > 30) {
+                if (dx < 0) goToSlide(bannerIdx + 1);
+                else goToSlide(bannerIdx - 1);
+                resetBannerInterval();
+            }
+        });
+        bannerSection.addEventListener('mouseleave', () => { mouseDown = false; });
 
         let lastScrollY = 0;
         let scrollTimeout;
