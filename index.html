@@ -1771,21 +1771,36 @@
             return bookings[dateKey] || [];
         }
 
-        function isSlotTakenByBooking(dateKey, slotIdx) {
+        function isSlotTakenByBooking(dateKey, slotIdx, stylist) {
             const bks = getBookingsForDate(dateKey);
-            return bks.some(b => timeSlots.indexOf(b.time) === slotIdx);
+            return bks.some(b => {
+                const timeMatch = timeSlots.indexOf(b.time) === slotIdx;
+                if (!timeMatch) return false;
+                if (!stylist || stylist === 'any') return true;
+                return b.stylist === stylist || b.stylist === 'any';
+            });
         }
 
-        // Get taken slots - only real bookings, no demo slots
-        function generateTakenSlots(dateKey) {
-            if (takenSlots[dateKey]) return takenSlots[dateKey];
+        // Get taken slots for a specific stylist
+        function generateTakenSlots(dateKey, stylist) {
+            const cacheKey = dateKey + '_' + (stylist || 'all');
+            if (takenSlots[cacheKey]) return takenSlots[cacheKey];
             const taken = new Set();
             const bks = getBookingsForDate(dateKey);
             bks.forEach(b => {
                 const idx = timeSlots.indexOf(b.time);
-                if (idx !== -1) taken.add(idx);
+                if (idx === -1) return;
+                if (stylist && stylist !== 'any') {
+                    // Only mark taken if this stylist is booked (or 'any' stylist is booked)
+                    if (b.stylist === stylist || b.stylist === 'any') {
+                        taken.add(idx);
+                    }
+                } else {
+                    // No stylist selected — show all bookings
+                    taken.add(idx);
+                }
             });
-            takenSlots[dateKey] = taken;
+            takenSlots[cacheKey] = taken;
             return taken;
         }
 
@@ -1818,7 +1833,7 @@
                 const dayOfWeek = getJalaliDayOfWeek(currentYear, currentMonth + 1, d); // 0=Saturday
                 const isWeekend = dayOfWeek === 6; // جمعه
                 const dateKey = `${currentYear}-${currentMonth + 1}-${d}`;
-                const taken = generateTakenSlots(dateKey);
+                const taken = generateTakenSlots(dateKey, null);
                 const isFull = taken.size >= timeSlots.length;
                 const dayBookings = getBookingsForDate(dateKey);
 
@@ -1861,6 +1876,7 @@
         function renderSlots() {
             const bookingsPanel = document.getElementById('bookingsPanel');
             const bookingsList = document.getElementById('bookingsList');
+            const selectedStylist = bookStylist.value;
 
             if (!selectedDate) {
                 slotsGrid.innerHTML = '';
@@ -1872,14 +1888,16 @@
 
             slotsEmpty.style.display = 'none';
             const dateKey = `${currentYear}-${currentMonth + 1}-${selectedDate}`;
-            const taken = generateTakenSlots(dateKey);
+            const taken = generateTakenSlots(dateKey, selectedStylist);
             const today = new Date();
             const todayJ = gregorianToJalali(today.getFullYear(), today.getMonth() + 1, today.getDate());
             const isToday = (currentYear === todayJ[0] && (currentMonth + 1) === todayJ[1] && selectedDate === todayJ[2]);
             const currentHour = today.getHours();
             const currentMin = today.getMinutes();
             const dayBookings = getBookingsForDate(dateKey);
-            slotsTitle.textContent = `${toPersianNum(selectedDate)} ${persianMonths[currentMonth]} — وقت‌های خالی:`;
+
+            const stylistLabel = selectedStylist && selectedStylist !== 'any' ? ` — ${stylistNames[selectedStylist]}` : '';
+            slotsTitle.textContent = `${toPersianNum(selectedDate)} ${persianMonths[currentMonth]}${stylistLabel} — وقت‌های خالی:`;
 
             // Bookings panel hidden — bookings now go to Telegram group
             bookingsPanel.style.display = 'none';
@@ -1892,7 +1910,6 @@
                 slotEl.textContent = slot;
 
                 const isTaken = taken.has(i);
-                const realBooking = dayBookings.find(b => timeSlots.indexOf(b.time) === i);
 
                 // Check if slot is past (for today)
                 let isPastSlot = false;
@@ -1914,8 +1931,18 @@
 
                 if (isTaken) {
                     slotEl.classList.add('taken');
-                    if (realBooking) {
-                        slotEl.setAttribute('data-meme', `${realBooking.name} — ${serviceNames[realBooking.service]}${realBooking.stylist && realBooking.stylist !== 'any' ? ' (' + stylistNames[realBooking.stylist] + ')' : ''}`);
+                    // Find which stylist booked this slot
+                    const bookingForSlot = dayBookings.find(b => {
+                        const timeMatch = timeSlots.indexOf(b.time) === i;
+                        if (!timeMatch) return false;
+                        if (selectedStylist && selectedStylist !== 'any') {
+                            return b.stylist === selectedStylist || b.stylist === 'any';
+                        }
+                        return true;
+                    });
+                    if (bookingForSlot) {
+                        const styName = bookingForSlot.stylist && bookingForSlot.stylist !== 'any' ? stylistNames[bookingForSlot.stylist] : '';
+                        slotEl.setAttribute('data-meme', `${bookingForSlot.name} — ${serviceNames[bookingForSlot.service]}${styName ? ' (' + styName + ')' : ''}`);
                     }
                 } else if (isPastSlot) {
                     slotEl.classList.add('past-slot');
@@ -1992,6 +2019,7 @@
         bookName.addEventListener('input', () => validateField(bookName));
         bookPhone.addEventListener('input', () => validateField(bookPhone));
         bookService.addEventListener('change', updateBookBtn);
+        bookStylist.addEventListener('change', () => { selectedSlot = null; renderSlots(); });
 
         function showBookingModal(dName, dStr, dTime, dService, dStylist, dNameUser, jokeText, jokeIcon) {
             let overlay = document.getElementById('bookingModalOverlay');
@@ -2043,12 +2071,13 @@
             if (!selectedDate || !selectedSlot) { bookBtn.textContent = 'اول یه روز و وقت انتخاب کن'; return; }
 
             const dateKey = `${currentYear}-${currentMonth + 1}-${selectedDate}`;
-            const taken = generateTakenSlots(dateKey);
+            const taken = generateTakenSlots(dateKey, bookStylist.value);
             const slotIdx = timeSlots.indexOf(selectedSlot);
             if (slotIdx !== -1) taken.add(slotIdx);
 
             const bookedSlot = selectedSlot;
-            delete takenSlots[dateKey]; // invalidate cache
+            // Invalidate all cache variants for this date
+            Object.keys(takenSlots).forEach(k => { if (k.startsWith(dateKey)) delete takenSlots[k]; });
             selectedSlot = null;
 
             const dateStr = `${toPersianNum(selectedDate)} ${persianMonths[currentMonth]} ${currentYear}`;
