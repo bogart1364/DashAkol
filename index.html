@@ -212,10 +212,10 @@
 
         /* ==================== STYLISTS ==================== */
         .stylists-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; max-width: 1200px; margin: 0 auto; }
-        .stylist-card { background: var(--surface); border: 1px solid rgba(255,255,255,0.05); padding: 2rem 1.5rem; text-align: center; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; }
+        .stylist-card { background: var(--surface); border: 1px solid rgba(255,255,255,0.05); clip-path: polygon(0 0, 80% 0, 80% 6%, 100% 6%, 100% 100%, 20% 100%, 0 75%); padding: 2rem 1.5rem; text-align: center; transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; }
         .stylist-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--wine), var(--gold), var(--navy-light)); transform: scaleX(0); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); transform-origin: right; }
         .stylist-card:hover::before { transform: scaleX(1); transform-origin: left; }
-        .stylist-card:hover { transform: translateY(-8px); border-color: rgba(114, 47, 55, 0.3); box-shadow: 0 30px 60px rgba(0,0,0,0.4), 0 0 40px rgba(114, 47, 55, 0.08); }
+        .stylist-card:hover { transform: translateY(-8px); border-color: rgba(114, 47, 55, 0.3); box-shadow: 0 30px 60px rgba(0,0,0,0.4), 0 0 40px rgba(114, 47, 55, 0.08); filter: brightness(1.1); }
         .stylist-avatar { width: 140px; height: 140px; margin: 0 auto 1.2rem; position: relative; }
         .stylist-svg { width: 100%; height: 100%; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         .stylist-card:hover .stylist-svg { transform: scale(1.08) rotate(-3deg); filter: drop-shadow(0 8px 20px rgba(114,47,55,0.3)); }
