@@ -35,7 +35,8 @@ async function sendTelegram(token, chatId, text, replyMarkup) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
     });
-    return res.json();
+    const data = await res.json();
+    return { ok: data && data.ok, error_code: data && data.error_code, description: data && data.description };
 }
 
 module.exports = async (req, res) => {
@@ -245,9 +246,24 @@ module.exports = async (req, res) => {
             }
 
             if (userChatId) {
-                try {
-                    await sendTelegram(token, userChatId, dmText);
-                } catch (e) { console.error('[DM] Send error:', e.message); }
+                const dmResult = await sendTelegram(token, userChatId, dmText);
+                if (!dmResult.ok) {
+                    const err = (dmResult.description || '').toLowerCase();
+                    let reason = 'اطلاع‌رسانی به مشتری ممکن نشد.';
+                    if (err.includes('initiate') || err.includes('cannot') || err.includes('kick')) {
+                        reason = 'مشتری هنوز روی استارت ربات نزده — لطفاً لینک ربات رو براش بفرست تا پیام رو ببینه.';
+                    } else if (err.includes('blocked')) {
+                        reason = 'مشتری ربات رو بلاک کرده، اطلاع‌رسانی ممکن نیست.';
+                    } else if (dmResult.error_code === 429) {
+                        reason = 'ارسال زیاد شد (rate limited)؛ دوباره امتحان کن.';
+                    }
+                    try {
+                        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ chat_id: adminChatId, text: `${statusEmoji} ${reason} — ${booking.name} (${booking.phone})`, reply_to_message_id: messageId })
+                        });
+                    } catch { }
+                }
             } else {
                 // Tell the admin the customer couldn't be reached (they never messaged the bot)
                 try {
