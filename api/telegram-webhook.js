@@ -96,13 +96,14 @@ module.exports = async (req, res) => {
         const chatId = Number(rawChatId);
         const isPrivate = chatId > 0;
         const text = msg.text || '';
-        const username = (msg.from.username || '').replace(/^@/, '');
-        const firstName = (msg.from.first_name || '').slice(0, 50);
-        const personalId = String(msg.from.id);
+        const username = (msg.from && msg.from.username || '').replace(/^@/, '');
+        const firstName = (msg.from && msg.from.first_name || '').slice(0, 50);
+        const personalId = String(msg.from ? msg.from.id : chatId);
         const phoneFromText = msg.contact && msg.contact.phone_number ? msg.contact.phone_number.replace(/\s+/g, '') : (text.trim().match(/^(\+?[\d\s\-]{10,15})$/) ? text.trim().replace(/[\s\-]/g, '') : '');
 
+        let linkMatched = false;
+
         try {
-            // Preserve an already-stored phone when the new message has no phone
             const existing = await db.execute({ sql: 'SELECT phone FROM telegram_users WHERE chat_id = ?', args: [personalId] });
             const prevPhone = existing.rows.length ? existing.rows[0].phone : null;
 
@@ -111,9 +112,7 @@ module.exports = async (req, res) => {
                 args: [personalId, username.slice(0, 30), firstName, phoneFromText || prevPhone || null]
             });
 
-            // Precise linking via deep link: /start link_<code>
             const linkMatch = text.match(/^\/start\s+link_([a-f0-9]+)$/i);
-            let linkMatched = false;
             if (linkMatch) {
                 try {
                     const linkRes = await db.execute({ sql: 'UPDATE bookings SET telegram_chat_id = ? WHERE link_code = ? AND (telegram_chat_id IS NULL OR telegram_chat_id = ?)', args: [personalId, linkMatch[1], ''] });
@@ -121,15 +120,16 @@ module.exports = async (req, res) => {
                 } catch (e) { console.error('[MSG] Link error:', e.message); }
             }
 
-            // Auto-link pending bookings: first by phone, then by name
-            const pending = await db.execute("SELECT id, name, phone FROM bookings WHERE (telegram_chat_id IS NULL OR telegram_chat_id = '')");
-            for (const row of pending.rows) {
-                const matchByPhone = phoneFromText && row.phone.replace(/\D/g, '').slice(-10) === phoneFromText.slice(-10);
-                const matchByName = row.name.trim().toLowerCase() === (firstName || '').trim().toLowerCase();
-                if (matchByPhone || matchByName) {
-                    await db.execute({ sql: 'UPDATE bookings SET telegram_chat_id = ? WHERE id = ?', args: [personalId, row.id] });
+            try {
+                const pending = await db.execute("SELECT id, name, phone FROM bookings WHERE (telegram_chat_id IS NULL OR telegram_chat_id = '')");
+                for (const row of pending.rows) {
+                    const matchByPhone = phoneFromText && row.phone && row.phone.replace(/\D, '').slice(-10) === phoneFromText.slice(-10);
+                    const matchByName = row.name && row.name.trim().toLowerCase() === (firstName || '').trim().toLowerCase();
+                    if (matchByPhone || matchByName) {
+                        await db.execute({ sql: 'UPDATE bookings SET telegram_chat_id = ? WHERE id = ?', args: [personalId, row.id] });
+                    }
                 }
-            }
+            } catch (e) { console.error('[MSG] Auto-link error:', e.message); }
         } catch (e) {
             console.error('[MSG] DB error:', e.message);
         }
@@ -145,7 +145,6 @@ module.exports = async (req, res) => {
                 console.error('[/start] Reply error:', e.message);
             }
         } else if (isPrivate) {
-            // Any other private message confirms authentication to the user
             try {
                 await sendTelegram(token, personalId, `شناسایی شد ✅\n\nنوبتی با اسم «${firstName}» ثبت کرده بودی، همون اول که پیام دادی، وصل شد به حساب تلگرامت.\n\nهر وقت نوبتت تایید یا رد شه، همین‌جا خبرت می‌کنیم.`);
             } catch (e) {
@@ -160,6 +159,10 @@ module.exports = async (req, res) => {
     if (body.callback_query) {
         const cb = body.callback_query;
         const data = cb.data || '';
+        if (!cb.message) {
+            try { await fetch(`https://api.telegram.org/bot${token}/answerCallbackQuery`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ callback_query_id: cb.query_id, text: 'خطا!' }) }); } catch {}
+            return res.status(200).json({ ok: true });
+        }
         const adminChatId = cb.message.chat.id;
         const messageId = cb.message.message_id;
         const adminName = (cb.from.first_name || 'ادمین').slice(0, 50);
