@@ -55,7 +55,7 @@ module.exports = async (req, res) => {
         }
         const db = getClient();
         try {
-            await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (chat_id TEXT PRIMARY KEY, username TEXT, first_name TEXT, created_at TEXT DEFAULT (datetime('now')))`);
+            await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (chat_id TEXT PRIMARY KEY, username TEXT, first_name TEXT, phone TEXT, created_at TEXT DEFAULT (datetime('now')))`);
             await db.execute("DELETE FROM telegram_users WHERE chat_id = '123456'");
             const users = await db.execute('SELECT * FROM telegram_users ORDER BY created_at DESC');
             const bookings = await db.execute('SELECT id, date_key, time, name, phone, service, stylist, status, telegram_username FROM bookings ORDER BY id DESC LIMIT 10');
@@ -78,37 +78,42 @@ module.exports = async (req, res) => {
     if (typeof body === 'string') { try { body = JSON.parse(body); } catch { return res.status(400).json({ error: 'Invalid JSON' }); } }
 
     const db = getClient();
-    await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (chat_id TEXT PRIMARY KEY, username TEXT, first_name TEXT, created_at TEXT DEFAULT (datetime('now')))`);
+    await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (chat_id TEXT PRIMARY KEY, username TEXT, first_name TEXT, phone TEXT, created_at TEXT DEFAULT (datetime('now')))`);
     await db.execute(`CREATE TABLE IF NOT EXISTS bookings (id INTEGER PRIMARY KEY AUTOINCREMENT, date_key TEXT, time TEXT, name TEXT, phone TEXT, service TEXT, stylist TEXT, status TEXT DEFAULT 'pending', telegram_username TEXT, telegram_chat_id TEXT, telegram_message_id TEXT, created_at TEXT DEFAULT (datetime('now')))`);
+    try { await db.execute('ALTER TABLE telegram_users ADD COLUMN phone TEXT'); } catch {}
 
-    // Handle /start command
+    // Handle incoming messages (any private message authenticates the user)
     if (body.message) {
         const msg = body.message;
-        const chatId = msg.chat.id;
+        const rawChatId = msg.chat ? msg.chat.id : (msg.from ? msg.from.id : null);
+        const chatId = Number(rawChatId);
+        const isPrivate = chatId > 0;
         const text = msg.text || '';
         const username = (msg.from.username || '').replace(/^@/, '');
         const firstName = (msg.from.first_name || '').slice(0, 50);
         const personalId = String(msg.from.id);
+        const phoneFromText = msg.contact && msg.contact.phone_number ? msg.contact.phone_number.replace(/\s+/g, '') : (text.trim().match(/^(\+?[\d\s\-]{10,15})$/) ? text.trim().replace(/[\s\-]/g, '') : '');
 
         try {
             await db.execute({
-                sql: 'INSERT OR REPLACE INTO telegram_users (chat_id, username, first_name) VALUES (?, ?, ?)',
-                args: [personalId, username.slice(0, 30), firstName]
+                sql: 'INSERT OR REPLACE INTO telegram_users (chat_id, username, first_name, phone) VALUES (?, ?, ?, ?)',
+                args: [personalId, username.slice(0, 30), firstName, phoneFromText || null]
             });
 
-            if (username) {
-                const uname = username.toLowerCase();
-                const pending = await db.execute({ sql: "SELECT id FROM bookings WHERE LOWER(telegram_username) = ? AND (telegram_chat_id IS NULL OR telegram_chat_id = '')", args: [uname] });
-                for (const row of pending.rows) {
+            // Auto-link pending bookings: first by phone, then by name
+            const pending = await db.execute("SELECT id, name, phone FROM bookings WHERE (telegram_chat_id IS NULL OR telegram_chat_id = '') AND status = 'pending'");
+            for (const row of pending.rows) {
+                const matchByPhone = phoneFromText && row.phone.replace(/\D/g, '').slice(-10) === phoneFromText.slice(-10);
+                const matchByName = row.name.trim().toLowerCase() === (firstName || '').trim().toLowerCase();
+                if (matchByPhone || matchByName) {
                     await db.execute({ sql: 'UPDATE bookings SET telegram_chat_id = ? WHERE id = ?', args: [personalId, row.id] });
                 }
             }
         } catch (e) {
-            console.error('[/start] DB error:', e.message);
+            console.error('[MSG] DB error:', e.message);
         }
 
         if (text === '/start') {
-            const isPrivate = chatId > 0;
             const replyTo = isPrivate ? chatId : personalId;
             try {
                 await sendTelegram(token, replyTo, `سلام ${firstName}!\n\nبه بات داش آکل خوش اومدی.\n\nروی دکمه زیر بزن تا وارد سایت بشی و نوبتت رو رزرو کنی.`, {
@@ -116,6 +121,13 @@ module.exports = async (req, res) => {
                 });
             } catch (e) {
                 console.error('[/start] Reply error:', e.message);
+            }
+        } else if (isPrivate) {
+            // Any other private message confirms authentication to the user
+            try {
+                await sendTelegram(token, personalId, `شناسایی شد ✅\n\nنوبتی با اسم «${firstName}» ثبت کرده بودی، همون اول که پیام دادی، وصل شد به حساب تلگرامت.\n\nهر وقت نوبتت تایید یا رد شه، همین‌جا خبرت می‌کنیم.`);
+            } catch (e) {
+                console.error('[MSG] Reply error:', e.message);
             }
         }
 
@@ -178,26 +190,28 @@ module.exports = async (req, res) => {
 
             let userChatId = null;
 
+            // 1) Directly linked chat_id from when the user messaged the bot
             if (booking.telegram_chat_id && Number(booking.telegram_chat_id) > 0 && booking.telegram_chat_id !== '123456') {
                 userChatId = booking.telegram_chat_id;
             }
 
-            if (!userChatId && booking.telegram_username) {
+            // 2) Match by phone number first
+            if (!userChatId && booking.phone) {
                 try {
-                    const uname = booking.telegram_username.toLowerCase();
-                    const allUsers = await db.execute('SELECT chat_id, username, first_name FROM telegram_users ORDER BY created_at DESC');
-                    const personal = allUsers.rows.find(r =>
-                        (r.username || '').toLowerCase() === uname &&
-                        Number(r.chat_id) > 0 &&
-                        r.chat_id !== '123456'
+                    const bphone = booking.phone.replace(/\D/g, '').slice(-10);
+                    const allUsers = await db.execute('SELECT chat_id, phone, username, first_name FROM telegram_users');
+                    const phoneMatch = allUsers.rows.find(r =>
+                        r.phone && r.phone.replace(/\D/g, '').slice(-10) === bphone &&
+                        Number(r.chat_id) > 0 && r.chat_id !== '123456'
                     );
-                    if (personal) {
-                        userChatId = personal.chat_id;
+                    if (phoneMatch) {
+                        userChatId = phoneMatch.chat_id;
                         await db.execute({ sql: 'UPDATE bookings SET telegram_chat_id = ? WHERE id = ?', args: [userChatId, bookingId] });
                     }
-                } catch (e) { console.error('[DM] Username lookup error:', e.message); }
+                } catch (e) { console.error('[DM] Phone lookup error:', e.message); }
             }
 
+            // 3) Match by name
             if (!userChatId && booking.name) {
                 try {
                     const bname = booking.name.trim().toLowerCase();

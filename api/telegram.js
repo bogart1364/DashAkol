@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
     let body = req.body;
     if (typeof body === 'string') { try { body = JSON.parse(body); } catch { return res.status(400).json({ error: 'Invalid JSON' }); } }
 
-    const { name, phone, service, stylist, date, time, joke, telegram_username, booking_id } = body || {};
+    const { name, phone, service, stylist, date, time, joke, booking_id } = body || {};
     if (!name || !phone || !service || !date || !time) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -33,11 +33,10 @@ module.exports = async (req, res) => {
     const cleanDate = sanitize(date, 40);
     const cleanTime = sanitize(time, 10);
     const cleanJoke = joke ? sanitize(joke, 60) : '';
-    const tgUser = telegram_username ? ` | @${sanitize(telegram_username.replace(/^@/, ''), 30)}` : '';
 
     const text = ` Barber نوبت جدید — داش آکل
 
-👤 نام: ${cleanName}${tgUser}
+👤 نام: ${cleanName}
 📱 تلفن: ${cleanPhone}
 ✂️ سرویس: ${cleanService}
 💇 استایلیست: ${cleanStylist}

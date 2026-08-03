@@ -73,14 +73,13 @@ module.exports = async (req, res) => {
         let body = req.body;
         if (typeof body === 'string') { try { body = JSON.parse(body); } catch { return res.status(400).json({ error: 'Invalid JSON' }); } }
 
-        const { date_key, time, name, phone, service, stylist, telegram_username } = body || {};
+        const { date_key, time, name, phone, service, stylist } = body || {};
         if (!date_key || !time || !name || !phone || !service) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
         const cleanName = sanitize(name, 50);
         const cleanPhone = sanitize(phone, 15);
-        const cleanUsername = telegram_username ? sanitize(telegram_username.replace(/^@/, ''), 30) : null;
 
         if (!cleanName || cleanName.length < 2) return res.status(400).json({ error: 'Invalid name' });
         if (!/^09\d{8,9}$/.test(cleanPhone)) return res.status(400).json({ error: 'Invalid phone' });
@@ -89,8 +88,8 @@ module.exports = async (req, res) => {
 
         try {
             await db.execute({
-                sql: 'INSERT INTO bookings (date_key, time, name, phone, service, stylist, telegram_username) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                args: [sanitize(date_key, 20), sanitize(time, 10), cleanName, cleanPhone, service, stylist || 'any', cleanUsername]
+                sql: 'INSERT INTO bookings (date_key, time, name, phone, service, stylist) VALUES (?, ?, ?, ?, ?)',
+                args: [sanitize(date_key, 20), sanitize(time, 10), cleanName, cleanPhone, service, stylist || 'any']
             });
             const maxId = await db.execute('SELECT last_insert_rowid() as id');
             const booking_id = maxId.rows[0].id;
