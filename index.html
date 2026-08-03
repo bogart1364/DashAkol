@@ -1877,7 +1877,7 @@
                 const dayOfWeek = getJalaliDayOfWeek(currentYear, currentMonth + 1, d); // 0=Saturday
                 const isWeekend = dayOfWeek === 6; // جمعه
                 const dateKey = `${currentYear}-${currentMonth + 1}-${d}`;
-                const taken = generateTakenSlots(dateKey, null);
+                const taken = generateTakenSlots(dateKey, bookStylist.value);
                 const isFull = taken.size >= timeSlots.length;
                 const dayBookings = getBookingsForDate(dateKey);
 
@@ -2063,7 +2063,7 @@
         bookName.addEventListener('input', () => validateField(bookName));
         bookPhone.addEventListener('input', () => validateField(bookPhone));
         bookService.addEventListener('change', updateBookBtn);
-        bookStylist.addEventListener('change', () => { selectedSlot = null; renderSlots(); });
+        bookStylist.addEventListener('change', () => { selectedSlot = null; renderCalendar(); renderSlots(); });
 
         function showBookingModal(dName, dStr, dTime, dService, dStylist, dNameUser, jokeText, jokeIcon, botUsername, linkCode) {
             let overlay = document.getElementById('bookingModalOverlay');
