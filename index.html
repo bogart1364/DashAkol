@@ -139,6 +139,23 @@
         .service-icon svg { width: 36px; height: 36px; fill: none; stroke: var(--wine-light); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 6px rgba(114, 47, 55, 0.3)); }
         .service-card:hover .service-icon { transform: scale(1.15) rotateY(10deg); background: linear-gradient(135deg, rgba(114, 47, 55, 0.3), rgba(26, 26, 62, 0.25)); box-shadow: 0 0 25px rgba(114, 47, 55, 0.2); }
 
+        /* ==================== SHOP ==================== */
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: clamp(0.8rem, 1.5vw, 1.2rem); }
+        .shop-card { background: var(--surface); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: clamp(1rem, 2vw, 1.5rem); display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.4s cubic-bezier(0.16,1,0.3,1); position: relative; overflow: hidden; }
+        .shop-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--gold), var(--wine)); transform: scaleX(0); transition: transform 0.4s ease; transform-origin: right; }
+        .shop-card:hover::before { transform: scaleX(1); transform-origin: left; }
+        .shop-card:hover { transform: translateY(-6px); border-color: rgba(201,168,76,0.25); box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 30px rgba(201,168,76,0.06); }
+        .shop-icon { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(114,47,55,0.1)); display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem; border: 1px solid rgba(201,168,76,0.15); transition: all 0.4s ease; }
+        .shop-card:hover .shop-icon { transform: scale(1.1); box-shadow: 0 0 20px rgba(201,168,76,0.15); }
+        .shop-icon svg { width: 32px; height: 32px; fill: none; stroke: var(--gold); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+        .shop-name { font-family: 'Vazirmatn', sans-serif; font-weight: 700; font-size: clamp(0.8rem, 1.2vw, 0.9rem); color: var(--text); margin-bottom: 0.3rem; }
+        .shop-desc { font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.6rem, 0.9vw, 0.7rem); color: var(--text-dimmer); margin-bottom: 0.6rem; line-height: 1.6; }
+        .shop-price { font-family: 'Vazirmatn', sans-serif; font-weight: 800; font-size: clamp(0.75rem, 1.1vw, 0.85rem); color: var(--gold); margin-bottom: 0.8rem; }
+        .shop-btn { width: 100%; padding: 0.5rem; background: transparent; border: 1px solid var(--gold); border-radius: 6px; color: var(--gold); font-family: 'Vazirmatn', sans-serif; font-weight: 700; font-size: 0.7rem; cursor: pointer; transition: all 0.3s; }
+        .shop-btn:hover { background: var(--gold); color: #0a0a0a; box-shadow: 0 4px 15px rgba(201,168,76,0.3); }
+        .shop-category { font-family: 'Vazirmatn', sans-serif; font-size: 0.6rem; color: var(--wine-light); background: rgba(114,47,55,0.12); border: 1px solid rgba(114,47,55,0.2); border-radius: 20px; padding: 0.15rem 0.6rem; position: absolute; top: 0.6rem; left: 0.6rem; }
+        .shop-empty { text-align: center; padding: 2rem; color: var(--text-dimmer); font-family: 'Vazirmatn', sans-serif; }
+
         .icon-scissors .scissors-blade-top { transform-origin: 12px 12px; animation: snipOpen 1.5s ease-in-out infinite; }
         .icon-scissors .scissors-blade-bottom { transform-origin: 12px 12px; animation: snipClose 1.5s ease-in-out infinite; }
         @keyframes snipOpen { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-12deg); } }
@@ -535,6 +552,11 @@
             .hero-badge { font-size: 0.6rem !important; }
             .hero-subtitle { font-size: 0.85rem !important; }
             .booking-modal { max-width: 92vw; }
+            .shop-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+            .shop-icon { width: 52px; height: 52px; }
+            .shop-icon svg { width: 26px; height: 26px; }
+            .shop-name { font-size: 0.72rem; }
+            .shop-price { font-size: 0.7rem; }
             .modal-header { padding: 1.5rem 1.2rem 0; }
             .modal-crown { width: 48px; height: 48px; }
             .modal-crown svg { width: 22px; height: 22px; }
@@ -550,7 +572,7 @@
         @media (hover: none) {
             body { cursor: auto; }
             #cursor, #cursor-dot, .cursor-trail, #scissors-cursor { display: none !important; }
-            .btn-primary, .btn-secondary, .booking-btn, .booking-input, .scroll-dot, #back-to-top, .service-card-inner, .stylist-card, .review-card, .gallery-item { cursor: pointer; }
+            .btn-primary, .btn-secondary, .booking-btn, .booking-input, .scroll-dot, #back-to-top, .service-card-inner, .stylist-card, .review-card, .gallery-item, .shop-card { cursor: pointer; }
         }
         @media (pointer: coarse) {
             #cursor, #cursor-dot, .cursor-trail, #scissors-cursor { display: none !important; }
@@ -1402,6 +1424,18 @@
         </div>
     </section>
 
+    <!-- ==================== SHOP ==================== -->
+    <section id="shop">
+        <div class="section-inner">
+            <div class="section-header reveal">
+                <span class="section-badge">فروشگاه داش آکل</span>
+                <h2 class="section-title">محصولات حرفه‌ای</h2>
+                <p class="section-desc">هر چی برای مراقبت از صورت و مو لازم داری، اینجاست. کیفیت تضمینی.</p>
+            </div>
+            <div class="shop-grid stagger" id="shopGrid"></div>
+        </div>
+    </section>
+
     <!-- ==================== REVIEWS ==================== -->
     <section id="reviews">
         <div class="section-inner">
@@ -1566,6 +1600,7 @@
         <a href="#hero" class="mobile-nav-link">خانه</a>
         <a href="#services" class="mobile-nav-link">خدمات</a>
         <a href="#stylists" class="mobile-nav-link">تیم ما</a>
+        <a href="#shop" class="mobile-nav-link">فروشگاه</a>
         <a href="#gallery" class="mobile-nav-link">گالری</a>
         <a href="#reviews" class="mobile-nav-link">نظرات</a>
         <a href="#booking" class="mobile-nav-link mobile-nav-cta">نوبت بگیر</a>
@@ -1629,7 +1664,7 @@
         }
         animateCursor();
 
-        document.querySelectorAll('a, button, .service-card-inner, .stylist-card, .review-card, .gallery-item, input, select').forEach(el => {
+        document.querySelectorAll('a, button, .service-card-inner, .stylist-card, .review-card, .gallery-item, .shop-card, .shop-btn, input, select').forEach(el => {
             el.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
             el.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
         });
@@ -2334,6 +2369,50 @@
             for (let c = 0; c < pd.length; c++) pj += pDigits[parseInt(pd[c])];
             document.getElementById('copyright-year').textContent = `© ${pj} داش آکل. تمامی حقوق موها محفوظ است.`;
         } catch {}
+
+        const shopItems = [
+            { name: 'ادکلن مردانه داش آکل', desc: 'عطر اختصاصی سالن، ماندگاری بالا', price: '۳۵۰,۰۰۰', cat: 'ادکلن', icon: '<path d="M12 2v6m0 0l-3 8v4a2 2 0 002 2h6a2 2 0 002-2v-4l-3-8V2m-4 0h4m-5 10h4"/>' },
+            { name: 'افترشیو کلاسیک', desc: 'خنک‌کننده و التیام‌بخش بعد از اصلاح', price: '۱۸۰,۰۰۰', cat: 'افترشیو', icon: '<rect x="5" y="4" width="14" height="16" rx="2"/><line x1="12" y1="4" x2="12" y2="1"/><path d="M8 12h8"/>' },
+            { name: 'افترشیو خنک‌کننده', desc: ' menthol و عصاره نعناع', price: '۲۰۰,۰۰۰', cat: 'افترشیو', icon: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 3"/>' },
+            { name: 'ماشین اصلاح حرفه‌ای', desc: ' motor قوی، تیغه استیل ضد زنگ', price: '۱,۲۰۰,۰۰۰', cat: 'ماشین اصلاح', icon: '<rect x="7" y="2" width="10" height="18" rx="3"/><line x1="12" y1="16" x2="12" y2="20"/><line x1="9" y1="20" x2="15" y2="20"/>' },
+            { name: 'ماشین اصلاح خط‌زن', desc: 'برای خط‌کشی دقیق ریش و مو', price: '۸۵۰,۰۰۰', cat: 'ماشین اصلاح', icon: '<path d="M6 4h12v16H6z" rx="1"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="10" y1="12" x2="14" y2="12"/>' },
+            { name: 'تیغ صورت حرفه‌ای', desc: 'فولاد ضد زنگ، دسته ارگونومیک', price: '۴۵۰,۰۰۰', cat: 'تیغ', icon: '<path d="M4 12l16-8v16z"/><line x1="20" y1="4" x2="20" y2="20"/>' },
+            { name: 'تیغ‌های یدکی', desc: 'بسته ۱۰ عددی تیغ تعویضی', price: '۱۲۰,۰۰۰', cat: 'تیغ', icon: '<rect x="3" y="6" width="18" height="12" rx="1"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="3" y1="14" x2="21" y2="14"/>' },
+            { name: 'صابون اصلاح حرفه‌ای', desc: 'کف غنی، عصاره آلوئه‌ورا', price: '۱۵۰,۰۰۰', cat: 'اصلاح', icon: '<circle cx="12" cy="12" r="8"/><path d="M8 12c0-2 1.5-4 4-4s4 2 4 4"/>' },
+            { name: 'فوم اصلاح', desc: 'کف نرم و لطیف برای اصلاح راحت', price: '۹۵,۰۰۰', cat: 'اصلاح', icon: '<path d="M5 14h14"/><circle cx="8" cy="10" r="2"/><circle cx="12" cy="8" r="2.5"/><circle cx="16" cy="10" r="2"/>' },
+            { name: 'ماسک صورت مردانه', desc: 'پاک‌سازی عمیق و جوان‌سازی پوست', price: '۱۸۰,۰۰۰', cat: 'مراقبت پوست', icon: '<path d="M4 10c0-4 3.5-8 8-8s8 4 8 8c0 6-3.5 10-8 10S4 16 4 10z"/><circle cx="9" cy="9" r="1.5"/><circle cx="15" cy="9" r="1.5"/><path d="M9 14c1.5 1.5 4.5 1.5 6 0"/>' },
+            { name: 'کرم مرطوب‌کننده', desc: 'آبرسانی ۲۴ ساعته بدون چربی', price: '۲۲۰,۰۰۰', cat: 'مراقبت پوست', icon: '<rect x="5" y="3" width="14" height="18" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><path d="M9 11h6"/>' },
+            { name: 'کرم ضد آفتاب SPF50', desc: 'محافظت بالا از پوست صورت', price: '۲۵۰,۰۰۰', cat: 'مراقبت پوست', icon: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/>' },
+            { name: 'ژل مو حرفه‌ای', desc: 'نگهدارنده قوی بدون سفیدک', price: '۱۵۰,۰۰۰', cat: 'مو', icon: '<path d="M8 3h8l2 18H6z" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/>' },
+            { name: 'موم مو', desc: 'فرم‌دهی طبیعی با مات خاص', price: '۱۸۰,۰۰۰', cat: 'مو', icon: '<rect x="4" y="8" width="16" height="12" rx="2"/><path d="M8 8V6a4 4 0 018 0v2"/>' },
+            { name: 'اسپری مو', desc: 'نگهدارنده سبک بدون سنگینی', price: '۱۲۰,۰۰۰', cat: 'مو', icon: '<path d="M8 3h8v6l3 8H5l3-8V3z"/><line x1="12" y1="3" x2="12" y2="1"/><line x1="10" y1="1" x2="14" y2="1"/>' },
+            { name: 'قیچی اصلاح حرفه‌ای', desc: 'فولاد ژاپنی، تیغه الماسه', price: '۸۵۰,۰۰۰', cat: 'ابزار', icon: '<circle cx="8" cy="16" r="4"/><circle cx="16" cy="16" r="4"/><line x1="10" y1="13" x2="16" y2="5"/><line x1="14" y1="13" x2="8" y2="5"/>' },
+            { name: 'شانه حرفه‌ای', desc: 'ضد الکتریسیته ساکن، دندانه ریز', price: '۸۵,۰۰۰', cat: 'ابزار', icon: '<rect x="4" y="4" width="16" height="4" rx="1"/><line x1="6" y1="8" x2="6" y2="18"/><line x1="10" y1="8" x2="10" y2="18"/><line x1="14" y1="8" x2="14" y2="18"/><line x1="18" y1="8" x2="18" y2="18"/>' },
+            { name: 'گیره مو', desc: 'ست ۱۰ عددی فلزی ضد زنگ', price: '۶۵,۰۰۰', cat: 'ابزار', icon: '<path d="M4 12h16"/><path d="M4 8l8 4-8 4"/><path d="M20 8l-8 4 8 4"/>' },
+            { name: 'حوله حرفه‌ای', desc: 'نرم و جاذب، سایز سالنی', price: '۱۸۰,۰۰۰', cat: 'اکسسوری', icon: '<rect x="3" y="6" width="18" height="12" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="3" y1="14" x2="21" y2="14"/>' },
+            { name: 'آینه دستی', desc: 'بزرگنمایی دوطرفه، دسته چوبی', price: '۱۲۰,۰۰۰', cat: 'اکسسوری', icon: '<circle cx="12" cy="10" r="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/>' }
+        ];
+
+        function renderShop() {
+            const grid = document.getElementById('shopGrid');
+            if (!grid) return;
+            grid.innerHTML = shopItems.map(item => `
+                <div class="shop-card">
+                    <span class="shop-category">${item.cat}</span>
+                    <div class="shop-icon"><svg viewBox="0 0 24 24">${item.icon}</svg></div>
+                    <div class="shop-name">${item.name}</div>
+                    <div class="shop-desc">${item.desc}</div>
+                    <div class="shop-price">${item.price} تومان</div>
+                    <button class="shop-btn" onclick="buyShopItem('${item.name.replace(/'/g, "\\'")}')">سفارش در تلگرام</button>
+                </div>
+            `).join('');
+        }
+        renderShop();
+
+        function buyShopItem(name) {
+            const tgUrl = `https://t.me/${BOT_USERNAME}?text=${encodeURIComponent('می‌خوام سفارش بدم: ' + name)}`;
+            window.open(tgUrl, '_blank');
+        }
     })();
     </script>
 </body>
