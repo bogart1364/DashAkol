@@ -1046,10 +1046,32 @@
             <div class="section-header reveal">
                 <span class="section-badge">رزرو آنلاین</span>
                 <h2 class="section-title">نوبت بگیر، مرد شو</h2>
-                <p class="section-desc">تقویم رو نگاه کن، روزتو انتخاب کن، وقتت رو بچین. ساده‌ست بابا.</p>
+                <p class="section-desc">مشخصاتت رو بده، تقویم رو نگاه کن، روزتو انتخاب کن. ساده‌ست بابا.</p>
             </div>
             <div class="booking-box reveal">
                 <div class="booking-status"><div class="booking-status-dot"></div><span class="booking-status-text">سالن بازه، بیا</span></div>
+
+                <div class="booking-label">اسمت چیه؟</div>
+                <input type="text" class="booking-input" id="bookName" placeholder="مثلاً: علی آقا">
+                <div class="booking-label">شماره‌ات رو بده</div>
+                <input type="tel" inputmode="numeric" pattern="09[0-9]{9}" class="booking-input" id="bookPhone" placeholder="۰۹۱۲۱۲۳۴۵۶۷">
+                <div class="booking-label">کدوم سرویس؟</div>
+                <select class="booking-input" id="bookService" style="appearance: none;">
+                    <option value="hair">اصلاح مو — تراشیدن ذهن</option>
+                    <option value="beard">فرم دهی ریش — جراحی ریش</option>
+                    <option value="classic">اصلاح کلاسیک — تعمیرات اساسی</option>
+                    <option value="texturize">پیتاژ — بازسازی کامل</option>
+                    <option value="full">پکیج مرد کامل</option>
+                    <option value="groom">پکیج داماد — روز بزرگ</option>
+                </select>
+                <div class="booking-label">با کدوم استایلیست؟</div>
+                <select class="booking-input" id="bookStylist" style="appearance: none;">
+                    <option value="any">هرکی خالی باشه (پیشنهاد ویژه)</option>
+                    <option value="reza">رضا — استاد خط و فرم</option>
+                    <option value="mehdi">مهدی — سلطان ریش</option>
+                    <option value="amir">امیر — متخصص پیتاژ</option>
+                    <option value="saeid">سعید — کلاسیک‌کار حرفه‌ای</option>
+                </select>
 
                 <!-- Calendar -->
                 <div class="cal-wrapper">
@@ -1083,33 +1105,6 @@
                     <div class="slots-empty" id="slotsEmpty"><span style="font-size:1.2rem;color:var(--wine);">&#9650;</span> اول تقویم یه روز انتخاب کن</div>
                 </div>
 
-                <!-- Bookings Panel (hidden — bookings now go to Telegram group) -->
-                <div class="bookings-panel" id="bookingsPanel" style="display:none !important;">
-                    <div class="bookings-panel-title"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> نوبت‌های ثبت شده این روز</div>
-                    <div id="bookingsList"></div>
-                </div>
-
-                <div class="booking-label">اسمت چیه؟</div>
-                <input type="text" class="booking-input" id="bookName" placeholder="مثلاً: علی آقا">
-                <div class="booking-label">شماره‌ات رو بده</div>
-                <input type="tel" inputmode="numeric" pattern="09[0-9]{9}" class="booking-input" id="bookPhone" placeholder="۰۹۱۲۱۲۳۴۵۶۷">
-                <div class="booking-label">کدوم سرویس؟</div>
-                <select class="booking-input" id="bookService" style="appearance: none;">
-                    <option value="hair">اصلاح مو — تراشیدن ذهن</option>
-                    <option value="beard">فرم دهی ریش — جراحی ریش</option>
-                    <option value="classic">اصلاح کلاسیک — تعمیرات اساسی</option>
-                    <option value="texturize">پیتاژ — بازسازی کامل</option>
-                    <option value="full">پکیج مرد کامل</option>
-                    <option value="groom">پکیج داماد — روز بزرگ</option>
-                </select>
-                <div class="booking-label">با کدوم استایلیست؟</div>
-                <select class="booking-input" id="bookStylist" style="appearance: none;">
-                    <option value="any">هرکی خالی باشه (پیشنهاد ویژه)</option>
-                    <option value="reza">رضا — استاد خط و فرم</option>
-                    <option value="mehdi">مهدی — سلطان ریش</option>
-                    <option value="amir">امیر — متخصص پیتاژ</option>
-                    <option value="saeid">سعید — کلاسیک‌کار حرفه‌ای</option>
-                </select>
                 <button type="button" class="booking-btn" id="bookBtn" disabled>اول یه وقت انتخاب کن</button>
                 <p class="booking-note">بعد از رزرو، یه پیام میدیم که بیا. برای اینکه نتیجه نوبتت مستقیم توی تلگرام بهت برسه، قبل یا بعد از رزرو یه پیام به بات داش آکل بده تا بشناسیمت.</p>
             </div>
