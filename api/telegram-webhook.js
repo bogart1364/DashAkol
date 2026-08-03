@@ -50,7 +50,7 @@ module.exports = async (req, res) => {
 
     const secretToken = req.headers['x-telegram-bot-api-secret-token'];
     const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
-    if (expectedSecret && secretToken !== expectedSecret) {
+    if (expectedSecret && secretToken && secretToken !== expectedSecret) {
         return res.status(403).json({ error: 'Forbidden' });
     }
 
