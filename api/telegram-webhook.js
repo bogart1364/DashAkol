@@ -95,13 +95,17 @@ module.exports = async (req, res) => {
         const phoneFromText = msg.contact && msg.contact.phone_number ? msg.contact.phone_number.replace(/\s+/g, '') : (text.trim().match(/^(\+?[\d\s\-]{10,15})$/) ? text.trim().replace(/[\s\-]/g, '') : '');
 
         try {
+            // Preserve an already-stored phone when the new message has no phone
+            const existing = await db.execute({ sql: 'SELECT phone FROM telegram_users WHERE chat_id = ?', args: [personalId] });
+            const prevPhone = existing.rows.length ? existing.rows[0].phone : null;
+
             await db.execute({
                 sql: 'INSERT OR REPLACE INTO telegram_users (chat_id, username, first_name, phone) VALUES (?, ?, ?, ?)',
-                args: [personalId, username.slice(0, 30), firstName, phoneFromText || null]
+                args: [personalId, username.slice(0, 30), firstName, phoneFromText || prevPhone || null]
             });
 
             // Auto-link pending bookings: first by phone, then by name
-            const pending = await db.execute("SELECT id, name, phone FROM bookings WHERE (telegram_chat_id IS NULL OR telegram_chat_id = '') AND status = 'pending'");
+            const pending = await db.execute("SELECT id, name, phone FROM bookings WHERE (telegram_chat_id IS NULL OR telegram_chat_id = '')");
             for (const row of pending.rows) {
                 const matchByPhone = phoneFromText && row.phone.replace(/\D/g, '').slice(-10) === phoneFromText.slice(-10);
                 const matchByName = row.name.trim().toLowerCase() === (firstName || '').trim().toLowerCase();
@@ -211,16 +215,17 @@ module.exports = async (req, res) => {
                 } catch (e) { console.error('[DM] Phone lookup error:', e.message); }
             }
 
-            // 3) Match by name
+            // 3) Match by name (exact, or first-word match)
             if (!userChatId && booking.name) {
                 try {
                     const bname = booking.name.trim().toLowerCase();
+                    const bFirst = bname.split(/\s+/)[0];
                     const allUsers = await db.execute('SELECT chat_id, first_name FROM telegram_users ORDER BY created_at DESC');
-                    const nameMatch = allUsers.rows.find(r =>
-                        (r.first_name || '').trim().toLowerCase() === bname &&
-                        Number(r.chat_id) > 0 &&
-                        r.chat_id !== '123456'
-                    );
+                    const nameMatch = allUsers.rows.find(r => {
+                        const fn = (r.first_name || '').trim().toLowerCase();
+                        if (!fn) return false;
+                        return fn === bname || fn === bFirst || bname.includes(fn) || fn.includes(bFirst);
+                    });
                     if (nameMatch) {
                         userChatId = nameMatch.chat_id;
                         await db.execute({ sql: 'UPDATE bookings SET telegram_chat_id = ? WHERE id = ?', args: [userChatId, bookingId] });
@@ -232,6 +237,15 @@ module.exports = async (req, res) => {
                 try {
                     await sendTelegram(token, userChatId, dmText);
                 } catch (e) { console.error('[DM] Send error:', e.message); }
+            } else {
+                // Tell the admin the customer couldn't be reached (they never messaged the bot)
+                try {
+                    const note = `${statusEmoji} نوبت ${statusText} شد ولی اطلاع‌رسانی مستقیم به مشتری ممکن نشد.\n\nبرای اینکه مشتری نتیجه نوبتش رو توی تلگرام بگیره، باید یه بار به بات داش آکل پیام بده.`;
+                    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: adminChatId, text: note, reply_to_message_id: messageId })
+                    });
+                } catch (e) { console.error('[DM] Admin note error:', e.message); }
             }
         }
 

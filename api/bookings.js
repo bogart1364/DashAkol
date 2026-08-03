@@ -87,12 +87,28 @@ module.exports = async (req, res) => {
         if (stylist && !VALID_STYLISTS.includes(stylist)) return res.status(400).json({ error: 'Invalid stylist' });
 
         try {
+            await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (chat_id TEXT PRIMARY KEY, username TEXT, first_name TEXT, phone TEXT, created_at TEXT DEFAULT (datetime('now')))`);
+            try { await db.execute('ALTER TABLE telegram_users ADD COLUMN phone TEXT'); } catch {}
+
             await db.execute({
                 sql: 'INSERT INTO bookings (date_key, time, name, phone, service, stylist) VALUES (?, ?, ?, ?, ?)',
                 args: [sanitize(date_key, 20), sanitize(time, 10), cleanName, cleanPhone, service, stylist || 'any']
             });
             const maxId = await db.execute('SELECT last_insert_rowid() as id');
             const booking_id = maxId.rows[0].id;
+
+            // Auto-link to the Telegram user who messaged the bot (by phone, then by exact name)
+            try {
+                const bphone = cleanPhone.replace(/\D/g, '').slice(-10);
+                const bname = cleanName.trim().toLowerCase();
+                const users = await db.execute('SELECT chat_id, phone, first_name FROM telegram_users');
+                let linked = users.rows.find(r => r.phone && r.phone.replace(/\D/g, '').slice(-10) === bphone);
+                if (!linked) linked = users.rows.find(r => (r.first_name || '').trim().toLowerCase() === bname);
+                if (linked && Number(linked.chat_id) > 0 && linked.chat_id !== '123456') {
+                    await db.execute({ sql: 'UPDATE bookings SET telegram_chat_id = ? WHERE id = ?', args: [linked.chat_id, booking_id] });
+                }
+            } catch {}
+
             return res.status(200).json({ success: true, booking_id });
         } catch (e) {
             return res.status(500).json({ error: 'Insert failed' });
