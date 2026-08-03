@@ -61,7 +61,16 @@ ${cleanJoke ? `\n🎭 ${cleanJoke}` : ''}`;
         });
         const data = await tgRes.json();
         if (!data.ok) return res.status(502).json({ error: 'Telegram API error' });
-        return res.status(200).json({ success: true, message_id: data.result.message_id });
+
+        // Fetch bot username so the frontend can build a precise deep link
+        let botUsername = null;
+        try {
+            const meRes = await fetch(`https://api.telegram.org/bot${token}/getMe`);
+            const meData = await meRes.json();
+            if (meData.ok && meData.result && meData.result.username) botUsername = meData.result.username;
+        } catch {}
+
+        return res.status(200).json({ success: true, message_id: data.result.message_id, bot_username: botUsername });
     } catch (err) {
         return res.status(500).json({ error: 'Failed to send' });
     }

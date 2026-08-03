@@ -79,7 +79,7 @@ module.exports = async (req, res) => {
 
     const db = getClient();
     await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (chat_id TEXT PRIMARY KEY, username TEXT, first_name TEXT, phone TEXT, created_at TEXT DEFAULT (datetime('now')))`);
-    await db.execute(`CREATE TABLE IF NOT EXISTS bookings (id INTEGER PRIMARY KEY AUTOINCREMENT, date_key TEXT, time TEXT, name TEXT, phone TEXT, service TEXT, stylist TEXT, status TEXT DEFAULT 'pending', telegram_username TEXT, telegram_chat_id TEXT, telegram_message_id TEXT, created_at TEXT DEFAULT (datetime('now')))`);
+    await db.execute(`CREATE TABLE IF NOT EXISTS bookings (id INTEGER PRIMARY KEY AUTOINCREMENT, date_key TEXT, time TEXT, name TEXT, phone TEXT, service TEXT, stylist TEXT, status TEXT DEFAULT 'pending', telegram_username TEXT, telegram_chat_id TEXT, telegram_message_id TEXT, link_code TEXT, created_at TEXT DEFAULT (datetime('now')))`);
     try { await db.execute('ALTER TABLE telegram_users ADD COLUMN phone TEXT'); } catch {}
 
     // Handle incoming messages (any private message authenticates the user)
@@ -104,6 +104,16 @@ module.exports = async (req, res) => {
                 args: [personalId, username.slice(0, 30), firstName, phoneFromText || prevPhone || null]
             });
 
+            // Precise linking via deep link: /start link_<code>
+            const linkMatch = text.match(/^\/start\s+link_([a-f0-9]+)$/i);
+            let linkMatched = false;
+            if (linkMatch) {
+                try {
+                    const linkRes = await db.execute({ sql: 'UPDATE bookings SET telegram_chat_id = ? WHERE link_code = ? AND (telegram_chat_id IS NULL OR telegram_chat_id = ?)', args: [personalId, linkMatch[1], ''] });
+                    linkMatched = linkRes.rowsAffected > 0;
+                } catch (e) { console.error('[MSG] Link error:', e.message); }
+            }
+
             // Auto-link pending bookings: first by phone, then by name
             const pending = await db.execute("SELECT id, name, phone FROM bookings WHERE (telegram_chat_id IS NULL OR telegram_chat_id = '')");
             for (const row of pending.rows) {
@@ -117,10 +127,11 @@ module.exports = async (req, res) => {
             console.error('[MSG] DB error:', e.message);
         }
 
-        if (text === '/start') {
+        if (text === '/start' || linkMatched) {
             const replyTo = isPrivate ? chatId : personalId;
             try {
-                await sendTelegram(token, replyTo, `سلام ${firstName}!\n\nبه بات داش آکل خوش اومدی.\n\nروی دکمه زیر بزن تا وارد سایت بشی و نوبتت رو رزرو کنی.`, {
+                const linkedNote = linkMatched ? '\n\nنوبتت وصل شد — تا تایید ادمین صبر کن، نتیجه رو همین‌جا بهت می‌گیم.' : '';
+                await sendTelegram(token, replyTo, `سلام ${firstName}!\n\nبه بات داش آکل خوش اومدی.${linkedNote}\n\nروی دکمه زیر بزن تا وارد سایت بشی و نوبتت رو رزرو کنی.`, {
                     inline_keyboard: [[{ text: '💈 رزرو نوبت', url: 'https://dash-akol.vercel.app' }]]
                 });
             } catch (e) {

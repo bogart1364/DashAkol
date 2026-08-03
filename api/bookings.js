@@ -1,4 +1,5 @@
 const { createClient } = require('@libsql/client');
+const crypto = require('crypto');
 
 const ALLOWED_ORIGIN = 'https://dash-akol.vercel.app';
 
@@ -44,7 +45,7 @@ module.exports = async (req, res) => {
             telegram_message_id TEXT,
             created_at TEXT DEFAULT (datetime('now'))
         )`);
-        for (const col of ['status', 'telegram_username', 'telegram_chat_id', 'telegram_message_id']) {
+        for (const col of ['status', 'telegram_username', 'telegram_chat_id', 'telegram_message_id', 'link_code']) {
             try { await db.execute(`ALTER TABLE bookings ADD COLUMN ${col} TEXT`); } catch {}
         }
     } catch (e) {
@@ -90,9 +91,11 @@ module.exports = async (req, res) => {
             await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (chat_id TEXT PRIMARY KEY, username TEXT, first_name TEXT, phone TEXT, created_at TEXT DEFAULT (datetime('now')))`);
             try { await db.execute('ALTER TABLE telegram_users ADD COLUMN phone TEXT'); } catch {}
 
+            const link_code = crypto.randomBytes(6).toString('hex');
+
             await db.execute({
-                sql: 'INSERT INTO bookings (date_key, time, name, phone, service, stylist) VALUES (?, ?, ?, ?, ?)',
-                args: [sanitize(date_key, 20), sanitize(time, 10), cleanName, cleanPhone, service, stylist || 'any']
+                sql: 'INSERT INTO bookings (date_key, time, name, phone, service, stylist, link_code) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                args: [sanitize(date_key, 20), sanitize(time, 10), cleanName, cleanPhone, service, stylist || 'any', link_code]
             });
             const maxId = await db.execute('SELECT last_insert_rowid() as id');
             const booking_id = maxId.rows[0].id;
@@ -109,7 +112,7 @@ module.exports = async (req, res) => {
                 }
             } catch {}
 
-            return res.status(200).json({ success: true, booking_id });
+            return res.status(200).json({ success: true, booking_id, link_code });
         } catch (e) {
             return res.status(500).json({ error: 'Insert failed' });
         }
