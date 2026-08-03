@@ -79,10 +79,16 @@ module.exports = async (req, res) => {
     if (typeof body === 'string') { try { body = JSON.parse(body); } catch { return res.status(400).json({ error: 'Invalid JSON' }); } }
 
     const db = getClient();
-    await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (chat_id TEXT PRIMARY KEY, username TEXT, first_name TEXT, phone TEXT, created_at TEXT DEFAULT (datetime('now')))`);
-    await db.execute(`CREATE TABLE IF NOT EXISTS bookings (id INTEGER PRIMARY KEY AUTOINCREMENT, date_key TEXT, time TEXT, name TEXT, phone TEXT, service TEXT, stylist TEXT, status TEXT DEFAULT 'pending', telegram_username TEXT, telegram_chat_id TEXT, telegram_message_id TEXT, link_code TEXT, created_at TEXT DEFAULT (datetime('now')))`);
-    try { await db.execute('ALTER TABLE telegram_users ADD COLUMN phone TEXT'); } catch {}
+    try {
+        await db.execute(`CREATE TABLE IF NOT EXISTS telegram_users (chat_id TEXT PRIMARY KEY, username TEXT, first_name TEXT, phone TEXT, created_at TEXT DEFAULT (datetime('now')))`);
+        await db.execute(`CREATE TABLE IF NOT EXISTS bookings (id INTEGER PRIMARY KEY AUTOINCREMENT, date_key TEXT, time TEXT, name TEXT, phone TEXT, service TEXT, stylist TEXT, status TEXT DEFAULT 'pending', telegram_username TEXT, telegram_chat_id TEXT, telegram_message_id TEXT, link_code TEXT, created_at TEXT DEFAULT (datetime('now')))`);
+        try { await db.execute('ALTER TABLE telegram_users ADD COLUMN phone TEXT'); } catch {}
+    } catch (e) {
+        console.error('[WEBHOOK] DB init error:', e.message);
+        return res.status(200).json({ ok: true });
+    }
 
+    try {
     // Handle incoming messages (any private message authenticates the user)
     if (body.message) {
         const msg = body.message;
@@ -278,6 +284,7 @@ module.exports = async (req, res) => {
 
         return res.status(200).json({ ok: true });
     }
+    } catch (e) { console.error('[WEBHOOK] Unhandled error:', e.message); }
 
     return res.status(200).json({ ok: true });
 };
