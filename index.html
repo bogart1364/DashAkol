@@ -216,15 +216,22 @@
 
         /* ==================== BANNER CAROUSEL ==================== */
         #banner { background: var(--bg); }
-        .banner-track { display: flex; width: 400%; transition: transform 0.5s ease; }
-        .banner-slide { width: 25%; min-height: 50vh; display: flex; align-items: center; justify-content: center; position: relative; }
-        .banner-slide::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(114,47,55,0.1), rgba(26,26,62,0.1)); }
-        .banner-placeholder { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
-        .banner-placeholder svg { width: clamp(150px, 30vw, 280px); height: clamp(150px, 30vw, 280px); filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5)); }
-        .banner-placeholder span { font-family: 'Changa', cursive; font-size: clamp(1rem, 2vw, 1.5rem); color: var(--gold); font-weight: 700; letter-spacing: 0.05em; }
+        .banner-track { display: flex; width: 500%; transition: transform 0.5s ease; }
+        .banner-slide { width: 20%; min-height: 50vh; display: flex; align-items: center; justify-content: center; position: relative; }
+        .banner-slide::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(114,47,55,0.08), rgba(26,26,62,0.08)); }
+        .banner-product { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; padding: 2rem; text-align: center; }
+        .banner-product-icon { width: clamp(80px, 15vw, 120px); height: clamp(80px, 15vw, 120px); border-radius: 50%; background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(114,47,55,0.12)); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(201,168,76,0.2); animation: bannerIconFloat 4s ease-in-out infinite; }
+        .banner-product-icon svg { width: clamp(36px, 6vw, 50px); height: clamp(36px, 6vw, 50px); fill: none; stroke: var(--gold); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+        @keyframes bannerIconFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .banner-product-badge { font-family: 'Vazirmatn', sans-serif; font-size: 0.6rem; font-weight: 700; color: #0a0a0a; background: var(--gold); border-radius: 20px; padding: 0.2rem 0.8rem; letter-spacing: 0.02em; }
+        .banner-product-name { font-family: 'Changa', cursive; font-size: clamp(1.2rem, 3vw, 2rem); font-weight: 800; color: var(--text); text-shadow: 2px 2px 0 rgba(0,0,0,0.3); }
+        .banner-product-desc { font-family: 'Vazirmatn', sans-serif; font-size: clamp(0.7rem, 1.2vw, 0.85rem); color: var(--text-dim); max-width: 400px; line-height: 1.8; }
+        .banner-product-price { font-family: 'Vazirmatn', sans-serif; font-size: clamp(1rem, 2vw, 1.3rem); font-weight: 800; color: var(--gold); }
+        .banner-product-btn { font-family: 'Vazirmatn', sans-serif; font-size: 0.75rem; font-weight: 700; color: #0a0a0a; background: var(--gold); border: none; border-radius: 6px; padding: 0.6rem 1.5rem; text-decoration: none; transition: all 0.3s; cursor: pointer; }
+        .banner-product-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(201,168,76,0.4); }
         .banner-dots { position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.6rem; z-index: 10; }
-        .banner-dot { width: 10px; height: 10px; background: var(--text-dimmer); cursor: pointer; transition: all 0.3s; }
-        .banner-dot.active { background: var(--gold); width: 30px; }
+        .banner-dot { width: 10px; height: 10px; background: var(--text-dimmer); cursor: pointer; transition: all 0.3s; border-radius: 50%; }
+        .banner-dot.active { background: var(--gold); width: 30px; border-radius: 5px; }
         @keyframes bannerSlide { 0%, 20% { transform: translateX(0); } 25%, 45% { transform: translateX(-25%); } 50%, 70% { transform: translateX(-50%); } 75%, 95% { transform: translateX(-75%); } 100% { transform: translateX(0); } }
 
         /* ==================== STYLISTS ==================== */
@@ -831,36 +838,57 @@
     <section id="banner" style="min-height: 50vh; padding: 0; overflow: hidden; position: relative;">
         <div class="banner-track">
             <div class="banner-slide active">
-                <div class="banner-placeholder">
-                    <svg viewBox="0 0 120 120"><circle cx="60" cy="45" r="22" fill="#d4a574"/><ellipse cx="60" cy="95" rx="35" ry="25" fill="#1a1a2e"/><path d="M38 38 Q45 20 60 25 Q75 20 82 38" fill="#2a1a0a"/><circle cx="52" cy="42" r="2" fill="#1a0808"/><circle cx="68" cy="42" r="2" fill="#1a0808"/><path d="M55 52 Q60 56 65 52" fill="none" stroke="#1a0808" stroke-width="1.5"/></svg>
-                    <span>مدل ۱</span>
+                <div class="banner-product">
+                    <div class="banner-product-icon"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="18" rx="3"/><line x1="12" y1="16" x2="12" y2="20"/><line x1="9" y1="20" x2="15" y2="20"/></svg></div>
+                    <div class="banner-product-badge">پرفروش</div>
+                    <div class="banner-product-name">ماشین اصلاح حرفه‌ای</div>
+                    <div class="banner-product-desc">موتور قوی، تیغه استیل ضد زنگ، مناسب اصلاح روزانه</div>
+                    <div class="banner-product-price">۱,۲۰۰,۰۰۰ تومان</div>
+                    <a href="#shop" class="banner-product-btn">مشاهده در فروشگاه</a>
                 </div>
             </div>
             <div class="banner-slide">
-                <div class="banner-placeholder">
-                    <svg viewBox="0 0 120 120"><circle cx="60" cy="45" r="22" fill="#c4956a"/><ellipse cx="60" cy="95" rx="35" ry="25" fill="#2e1a1a"/><path d="M35 35 Q50 15 60 22 Q70 15 85 35" fill="#1a0f05"/><circle cx="52" cy="42" r="2" fill="#1a0808"/><circle cx="68" cy="42" r="2" fill="#1a0808"/><path d="M55 52 Q60 55 65 52" fill="none" stroke="#1a0808" stroke-width="1.5"/></svg>
-                    <span>مدل ۲</span>
+                <div class="banner-product">
+                    <div class="banner-product-icon"><svg viewBox="0 0 24 24"><circle cx="8" cy="16" r="4"/><circle cx="16" cy="16" r="4"/><line x1="10" y1="13" x2="16" y2="5"/><line x1="14" y1="13" x2="8" y2="5"/></svg></div>
+                    <div class="banner-product-badge">حرفه‌ای</div>
+                    <div class="banner-product-name">قیچی اصلاح حرفه‌ای</div>
+                    <div class="banner-product-desc">فولاد ژاپنی، تیغه الماسه، دسته ارگونومیک</div>
+                    <div class="banner-product-price">۸۵۰,۰۰۰ تومان</div>
+                    <a href="#shop" class="banner-product-btn">مشاهده در فروشگاه</a>
                 </div>
             </div>
             <div class="banner-slide">
-                <div class="banner-placeholder">
-                    <svg viewBox="0 0 120 120"><circle cx="60" cy="45" r="22" fill="#b8956a"/><ellipse cx="60" cy="95" rx="35" ry="25" fill="#1a2e1a"/><path d="M40 40 Q50 22 60 28 Q70 22 80 40" fill="#0a0a05"/><circle cx="52" cy="42" r="2" fill="#1a0808"/><circle cx="68" cy="42" r="2" fill="#1a0808"/><path d="M55 52 Q60 56 65 52" fill="none" stroke="#1a0808" stroke-width="1.5"/></svg>
-                    <span>مدل ۳</span>
+                <div class="banner-product">
+                    <div class="banner-product-icon"><svg viewBox="0 0 24 24"><path d="M12 2v6m0 0l-3 8v4a2 2 0 002 2h6a2 2 0 002-2v-4l-3-8V2m-4 0h4m-5 10h4"/></svg></div>
+                    <div class="banner-product-badge">اختصاصی</div>
+                    <div class="banner-product-name">ادکلن مردانه داش آکل</div>
+                    <div class="banner-product-desc">عطر اختصاصی سالن، ماندگاری بالا، رایحه مردانه</div>
+                    <div class="banner-product-price">۳۵۰,۰۰۰ تومان</div>
+                    <a href="#shop" class="banner-product-btn">مشاهده در فروشگاه</a>
                 </div>
             </div>
             <div class="banner-slide">
-                <div class="banner-placeholder">
-                    <svg viewBox="0 0 120 120"><circle cx="60" cy="45" r="22" fill="#d4a574"/><ellipse cx="60" cy="95" rx="35" ry="25" fill="#2e2e1a"/><path d="M36 36 Q48 18 60 24 Q72 18 84 36" fill="#1a1a0a"/><circle cx="52" cy="42" r="2" fill="#1a0808"/><circle cx="68" cy="42" r="2" fill="#1a0808"/><path d="M55 52 Q60 55 65 52" fill="none" stroke="#1a0808" stroke-width="1.5"/></svg>
-                    <span>مدل ۴</span>
+                <div class="banner-product">
+                    <div class="banner-product-icon"><svg viewBox="0 0 24 24"><path d="M8 3h8l2 18H6z" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/></svg></div>
+                    <div class="banner-product-badge">محبوب</div>
+                    <div class="banner-product-name">ژل مو حرفه‌ای</div>
+                    <div class="banner-product-desc">نگهدارنده قوی بدون سفیدک، مناسب انواع مو</div>
+                    <div class="banner-product-price">۱۵۰,۰۰۰ تومان</div>
+                    <a href="#shop" class="banner-product-btn">مشاهده در فروشگاه</a>
+                </div>
+            </div>
+            <div class="banner-slide">
+                <div class="banner-product">
+                    <div class="banner-product-icon"><svg viewBox="0 0 24 24"><path d="M4 10c0-4 3.5-8 8-8s8 4 8 8c0 6-3.5 10-8 10S4 16 4 10z"/><circle cx="9" cy="9" r="1.5"/><circle cx="15" cy="9" r="1.5"/><path d="M9 14c1.5 1.5 4.5 1.5 6 0"/></svg></div>
+                    <div class="banner-product-badge">مراقبت</div>
+                    <div class="banner-product-name">ماسک صورت مردانه</div>
+                    <div class="banner-product-desc">پاک‌سازی عمیق و جوان‌سازی پوست صورت</div>
+                    <div class="banner-product-price">۱۸۰,۰۰۰ تومان</div>
+                    <a href="#shop" class="banner-product-btn">مشاهده در فروشگاه</a>
                 </div>
             </div>
         </div>
-        <div class="banner-dots">
-            <span class="banner-dot active" data-index="0"></span>
-            <span class="banner-dot" data-index="1"></span>
-            <span class="banner-dot" data-index="2"></span>
-            <span class="banner-dot" data-index="3"></span>
-        </div>
+        <div class="banner-dots" id="bannerDots"></div>
     </section>
 
     <!-- ==================== STYLISTS ==================== -->
@@ -2248,19 +2276,29 @@
         renderCalendar();
 
         // Banner carousel with touch swipe
-        const bannerDots = document.querySelectorAll('.banner-dot');
-        const bannerTrack = document.querySelector('.banner-track');
         const bannerSection = document.getElementById('banner');
+        const bannerTrack = document.querySelector('.banner-track');
+        const bannerSlides = document.querySelectorAll('.banner-slide');
+        const bannerDotsContainer = document.getElementById('bannerDots');
+        const bannerTotal = bannerSlides.length;
         let bannerIdx = 0;
-        const bannerTotal = 4;
         let bannerAnimating = false;
+
+        bannerSlides.forEach((_, i) => {
+            const dot = document.createElement('span');
+            dot.className = 'banner-dot' + (i === 0 ? ' active' : '');
+            dot.dataset.index = i;
+            dot.addEventListener('click', () => goToSlide(i));
+            bannerDotsContainer.appendChild(dot);
+        });
+        const bannerDots = document.querySelectorAll('.banner-dot');
 
         function goToSlide(idx) {
             if (bannerAnimating) return;
             bannerAnimating = true;
             bannerIdx = ((idx % bannerTotal) + bannerTotal) % bannerTotal;
             bannerTrack.style.transition = 'transform 0.5s ease';
-            bannerTrack.style.transform = `translateX(-${bannerIdx * 25}%)`;
+            bannerTrack.style.transform = `translateX(-${bannerIdx * (100 / bannerTotal)}%)`;
             bannerDots.forEach((d, i) => d.classList.toggle('active', i === bannerIdx));
             setTimeout(() => { bannerAnimating = false; }, 500);
         }
